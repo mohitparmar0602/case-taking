@@ -51,8 +51,13 @@ def clinical_staff_required(view_func):
 
 
 def registration_staff_required(view_func):
-    """Accessible by Receptionists, Doctors, and Admin"""
-    return role_required(User.Role.RECEPTIONIST, User.Role.DOCTOR, User.Role.ADMIN)(view_func)
+    """Accessible by Receptionists and Admin (Doctors cannot register or edit patients)"""
+    return role_required(User.Role.RECEPTIONIST, User.Role.ADMIN)(view_func)
+
+
+def patient_directory_required(view_func):
+    """Accessible by Receptionists, Nurses, and Admin (Doctors cannot access patient directory)"""
+    return role_required(User.Role.RECEPTIONIST, User.Role.NURSE, User.Role.ADMIN)(view_func)
 
 
 class RoleRequiredMixin(AccessMixin):

@@ -12,9 +12,11 @@
             <p class="text-secondary small mb-0">Track patient consultation schedules, avoid double-booking collisions, and coordinate physician hours.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
+            {% if is_receptionist or is_admin %}
             <a href="{% url 'appointments:appointment_book' %}" class="btn btn-deep-teal btn-sm shadow-sm">
                 <i class="bi bi-calendar-plus me-1"></i>Book Appointment
             </a>
+            {% endif %}
         </div>
     </div>
 
@@ -111,9 +113,11 @@
                                     <i class="bi bi-clipboard2-pulse"></i>
                                 </a>
                                 {% endif %}
+                                {% if is_receptionist or is_admin %}
                                 <a href="{% url 'appointments:appointment_edit' apt.pk %}" class="btn btn-sm btn-outline-teal" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
+                                {% endif %}
                                 {% if apt.status != 'CANCELLED' and apt.status != 'COMPLETED' %}
                                 <a href="{% url 'appointments:appointment_cancel' apt.pk %}" class="btn btn-sm btn-outline-danger" title="Cancel Appointment">
                                     <i class="bi bi-x-circle"></i>

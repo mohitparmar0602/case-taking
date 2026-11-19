@@ -18,16 +18,18 @@
             <span>Dashboard</span>
         </a>
 
+        {% if not is_doctor %}
         <div class="nav-section-title">Patient Records</div>
         <a href="{% url 'patients:patient_list' %}" class="nav-link {% if request.resolver_match.app_name == 'patients' and request.resolver_match.url_name == 'patient_list' %}active{% endif %}">
             <i class="bi bi-people"></i>
             <span>Patient Directory</span>
         </a>
-        {% if not is_nurse %}
+        {% if is_receptionist or is_admin %}
         <a href="{% url 'patients:patient_create' %}" class="nav-link {% if request.resolver_match.app_name == 'patients' and request.resolver_match.url_name == 'patient_create' %}active{% endif %}">
             <i class="bi bi-person-plus"></i>
             <span>Register Patient</span>
         </a>
+        {% endif %}
         {% endif %}
 
         <div class="nav-section-title">Case-Taking & Clinical</div>
@@ -47,10 +49,12 @@
             <i class="bi bi-calendar2-check"></i>
             <span>Appointments</span>
         </a>
+        {% if is_receptionist or is_admin %}
         <a href="{% url 'appointments:appointment_book' %}" class="nav-link {% if request.resolver_match.app_name == 'appointments' and request.resolver_match.url_name == 'appointment_book' %}active{% endif %}">
             <i class="bi bi-calendar-plus"></i>
             <span>Book Appointment</span>
         </a>
+        {% endif %}
 
         {% if is_admin %}
         <div class="nav-section-title">Governance & Administration</div>
@@ -105,9 +109,11 @@
             <a href="{% url 'core:dashboard' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
                 <i class="bi bi-grid-1x2"></i> Dashboard
             </a>
+            {% if not is_doctor %}
             <a href="{% url 'patients:patient_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
                 <i class="bi bi-people"></i> Patient Directory
             </a>
+            {% endif %}
             <a href="{% url 'consultations:consultation_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
                 <i class="bi bi-clipboard2-pulse"></i> Consultations
             </a>

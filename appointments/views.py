@@ -10,6 +10,7 @@ from .models import Appointment
 from .forms import AppointmentBookingForm, AppointmentStatusUpdateForm
 from patients.models import Patient
 from accounts.models import User
+from accounts.permissions import receptionist_required
 from audit.services import log_audit_event
 from audit.models import AuditLog
 
@@ -75,6 +76,7 @@ def appointment_by_status_view(request, status):
 
 
 @login_required
+@receptionist_required
 def appointment_book_view(request):
     initial = {}
     patient_id = request.GET.get('patient_id')
@@ -113,6 +115,7 @@ def appointment_book_view(request):
 
 
 @login_required
+@receptionist_required
 def appointment_edit_view(request, pk):
     appointment = get_object_or_404(Appointment, pk=pk)
 

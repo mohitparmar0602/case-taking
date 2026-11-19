@@ -8,12 +8,13 @@ from django.http import JsonResponse
 
 from .models import Patient
 from .forms import PatientRegistrationForm, PatientSearchForm
-from accounts.permissions import registration_staff_required
+from accounts.permissions import registration_staff_required, patient_directory_required
 from audit.services import log_audit_event
 from audit.models import AuditLog
 
 
 @login_required
+@patient_directory_required
 def patient_list_view(request):
     form = PatientSearchForm(request.GET)
     patients_qs = Patient.objects.filter(is_active=True).order_by('-created_at')

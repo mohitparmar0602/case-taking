@@ -19,12 +19,14 @@
     <!-- Right Controls -->
     <div class="d-flex align-items-center gap-3">
         <!-- Live Patient Search Bar -->
+        {% if not is_doctor %}
         <div class="topbar-search d-none d-md-block">
             <form action="{% url 'patients:patient_list' %}" method="get" class="m-0">
                 <i class="bi bi-search"></i>
                 <input type="text" name="q" placeholder="Search patient ID, name, phone..." aria-label="Search">
             </form>
         </div>
+        {% endif %}
 
         <!-- Role Badge -->
         <span class="badge-clinical 

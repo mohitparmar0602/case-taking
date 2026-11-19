@@ -20,9 +20,11 @@
                     Week View
                 </a>
             </div>
+            {% if is_receptionist or is_admin %}
             <a href="{% url 'appointments:appointment_book' %}" class="btn btn-sm btn-deep-teal shadow-sm">
                 <i class="bi bi-plus-circle me-1"></i>Book
             </a>
+            {% endif %}
         </div>
     </div>
 

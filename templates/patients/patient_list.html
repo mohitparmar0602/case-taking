@@ -12,7 +12,7 @@
             <p class="text-secondary small mb-0">Search registered patients, review dossiers, and launch clinical consultations.</p>
         </div>
         <div>
-            {% if not is_nurse %}
+            {% if is_receptionist or is_admin %}
             <a href="{% url 'patients:patient_create' %}" class="btn btn-deep-teal btn-sm shadow-sm">
                 <i class="bi bi-person-plus-fill me-1"></i>Register New Patient
             </a>
