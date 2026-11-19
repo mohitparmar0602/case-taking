@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}System Administration | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Administrative Overview</span>
+            <h2 class="font-serif text-dark-teal mb-1">System Governance & Operations</h2>
+            <p class="text-secondary small mb-0">Live hospital records, patient intake velocity, clinical consultations, and security governance.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'patients:patient_create' %}" class="btn btn-deep-teal btn-sm shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i>Register Patient
+            </a>
+            <a href="{% url 'core:settings' %}" class="btn btn-outline-teal btn-sm shadow-sm">
+                <i class="bi bi-sliders me-1"></i>Institution Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- 4 Clean Metric Cards Grid -->
+    <div class="row g-3 mb-4">
+        <!-- Total Patients -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Total Patients</div>
+                        <div class="stat-value">{{ total_patients }}</div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">
+                            +{{ new_patients_today }} registered today
+                        </span>
+                    </div>
+                    <div class="stat-card-icon icon-teal">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Consultations -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Total Consultations</div>
+                        <div class="stat-value">{{ total_consultations }}</div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">
+                            {{ consultations_today }} recorded today
+                        </span>
+                    </div>
+                    <div class="stat-card-icon icon-green">
+                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Appointments</div>
+                        <div class="stat-value">{{ upcoming_appointments }}</div>
+                        <span class="badge-clinical badge-status-pending" style="font-size: 0.72rem;">
+                            {{ pending_appointments }} pending queue
+                        </span>
+                    </div>
+                    <div class="stat-card-icon icon-amber">
+                        <i class="bi bi-calendar-event-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Staff -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Medical Staff</div>
+                        <div class="stat-value">{{ total_doctors }}</div>
+                        <small class="text-secondary" style="font-size: 0.74rem;">{{ total_staff }} active users</small>
+                    </div>
+                    <div class="stat-card-icon icon-teal">
+                        <i class="bi bi-hospital-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Operational Workspace (Simplified 2-Column Split) -->
+    <div class="row g-4">
+        <!-- Recent Consultations (Primary Work) -->
+        <div class="col-lg-8">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal">
+                        <i class="bi bi-clipboard2-pulse text-clinical-green me-2"></i>Recent Clinical Case Records
+                    </h6>
+                    <a href="{% url 'consultations:consultation_list' %}" class="small text-deep-teal fw-semibold text-decoration-none">
+                        View All ({{ total_consultations }}) &rarr;
+                    </a>
+                </div>
+                <div class="clinical-table-wrap border-0">
+                    <table class="clinical-table">
+                        <thead>
+                            <tr>
+                                <th>Case ID</th>
+                                <th>Patient Name</th>
+                                <th>Attending Doctor</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in recent_consultations %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'consultations:consultation_detail' c.pk %}" class="fw-bold text-deep-teal text-decoration-none font-monospace">
+                                        {{ c.consultation_id }}
+                                    </a>
+                                </td>
+                                <td class="fw-medium text-dark-teal">
+                                    <a href="{% url 'patients:patient_detail' c.patient.pk %}" class="text-dark-teal text-decoration-none">
+                                        {{ c.patient.get_full_name }}
+                                    </a>
+                                    <small class="text-secondary d-block font-monospace">({{ c.patient.patient_id }})</small>
+                                </td>
+                                <td class="text-secondary small">{{ c.doctor.display_title }}</td>
+                                <td class="text-secondary small">{{ c.created_at|date:"d M, H:i" }}</td>
+                                <td>
+                                    {% if c.is_finalized %}
+                                    <span class="badge-clinical badge-status-completed">Finalized</span>
+                                    {% else %}
+                                    <span class="badge-clinical badge-status-pending">Draft</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'consultations:consultation_detail' c.pk %}" class="btn btn-sm btn-outline-teal" title="View Case Sheet">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center text-muted py-4">No clinical consultations recorded yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Quick Tools & Recent Intake -->
+        <div class="col-lg-4">
+            <!-- Administrative Quick Links -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-grid-fill text-clinical-green me-2"></i>Administration Tools</h6>
+                </div>
+                <div class="card-body d-flex flex-column gap-2 p-3">
+                    <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-teal text-start d-flex align-items-center justify-content-between p-2.5 rounded-3">
+                        <span><i class="bi bi-people me-2 text-clinical-green"></i>Patient Master Directory</span>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    </a>
+                    <a href="{% url 'accounts:staff_list' %}" class="btn btn-outline-teal text-start d-flex align-items-center justify-content-between p-2.5 rounded-3">
+                        <span><i class="bi bi-person-badge me-2 text-clinical-green"></i>Manage Hospital Staff</span>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    </a>
+                    <a href="{% url 'reports:dashboard' %}" class="btn btn-outline-teal text-start d-flex align-items-center justify-content-between p-2.5 rounded-3">
+                        <span><i class="bi bi-graph-up-arrow me-2 text-clinical-green"></i>Analytics & Clinical Reports</span>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    </a>
+                    <a href="{% url 'audit:audit_list' %}" class="btn btn-outline-teal text-start d-flex align-items-center justify-content-between p-2.5 rounded-3">
+                        <span><i class="bi bi-shield-check me-2 text-clinical-green"></i>Security & Audit Trail</span>
+                        <i class="bi bi-chevron-right text-muted small"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Recent Patient Intake -->
+            <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-person-plus text-deep-teal me-2"></i>Recent Intake</h6>
+                    <a href="{% url 'patients:patient_list' %}" class="small text-deep-teal fw-semibold text-decoration-none">All &rarr;</a>
+                </div>
+                <div class="p-3">
+                    <div class="d-flex flex-column gap-2">
+                        {% for p in recent_patients %}
+                        <div class="p-2.5 rounded-3 border d-flex align-items-center justify-content-between" style="background-color: var(--color-warm-bg); border-color: #EDF1ED !important;">
+                            <div>
+                                <a href="{% url 'patients:patient_detail' p.pk %}" class="fw-bold text-dark-teal text-decoration-none small d-block">
+                                    {{ p.get_full_name }}
+                                </a>
+                                <small class="text-secondary font-monospace" style="font-size: 0.72rem;">{{ p.patient_id }} &bull; {{ p.age }}y / {{ p.get_gender_display }}</small>
+                            </div>
+                            <span class="text-secondary small" style="font-size: 0.72rem;">{{ p.created_at|date:"d M" }}</span>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-muted small py-3">No recent patient registrations.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

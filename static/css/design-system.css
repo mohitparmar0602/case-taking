@@ -1,0 +1,378 @@
+/* ==========================================================================
+   DESIGN SYSTEM — PATIENT CASE-TAKING SOFTWARE
+   Smart India Hackathon 2026 | PS ID: SIH26047
+   Aesthetic: Scandinavian Clinical Minimalism & Editorial Healthcare Precision
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+    /* Color Palette Design Tokens */
+    --color-deep-teal: #123F3D;
+    --color-dark-teal: #0C302F;
+    --color-clinical-green: #6D9780;
+    --color-soft-sage: #B9D0C0;
+    --color-light-mint: #EAF2EC;
+    --color-warm-bg: #F7F8F4;
+    --color-pure-white: #FFFFFF;
+    --color-dark-text: #202B29;
+    --color-secondary-text: #697874;
+    --color-border: #EDF1ED;
+    --color-border-subtle: #F4F7F4;
+
+    /* Semantic Status Tokens */
+    --color-success: #438567;
+    --color-success-bg: #E8F3ED;
+    --color-warning: #D49C49;
+    --color-warning-bg: #FDF6EC;
+    --color-danger: #C75B5B;
+    --color-danger-bg: #FBEFEF;
+    --color-info: #3D788C;
+    --color-info-bg: #EBF4F7;
+
+    /* Typography Tokens */
+    --font-heading: 'DM Serif Display', Georgia, serif;
+    --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+    /* Radii */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+    --radius-xl: 26px;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-subtle: 0 1px 3px rgba(18, 63, 61, 0.03), 0 1px 2px rgba(18, 63, 61, 0.015);
+    --shadow-card: 0 4px 20px -2px rgba(18, 63, 61, 0.03), 0 2px 8px -1px rgba(18, 63, 61, 0.02);
+    --shadow-elevated: 0 14px 32px -4px rgba(18, 63, 61, 0.06), 0 4px 12px -2px rgba(18, 63, 61, 0.03);
+    --shadow-dropdown: 0 16px 36px -6px rgba(12, 48, 47, 0.12);
+
+    /* Transitions */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Base Reset & Core Styles */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    font-size: 15px;
+}
+
+body {
+    background-color: var(--color-warm-bg);
+    color: var(--color-dark-text);
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
+/* Typography Utility Classes */
+.font-serif {
+    font-family: var(--font-heading) !important;
+}
+
+.font-sans {
+    font-family: var(--font-body) !important;
+}
+
+h1, h2, h3, h4, .h1, .h2, .h3, .h4 {
+    font-family: var(--font-heading);
+    color: var(--color-dark-teal);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+}
+
+h5, h6, .h5, .h6 {
+    font-family: var(--font-body);
+    color: var(--color-dark-text);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+p {
+    color: var(--color-secondary-text);
+    margin-bottom: 1rem;
+}
+
+.eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-clinical-green);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.eyebrow-pill {
+    background-color: var(--color-light-mint);
+    color: var(--color-deep-teal);
+    padding: 0.35rem 0.85rem;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(109, 151, 128, 0.25);
+}
+
+/* Button Component System */
+.btn {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.88rem;
+    border-radius: var(--radius-md);
+    padding: 0.65rem 1.35rem;
+    transition: all var(--transition-base);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    letter-spacing: -0.01em;
+}
+
+.btn-deep-teal, .btn-primary {
+    background-color: var(--color-deep-teal) !important;
+    border-color: var(--color-deep-teal) !important;
+    color: var(--color-pure-white) !important;
+    box-shadow: 0 2px 6px rgba(18, 63, 61, 0.18);
+}
+
+.btn-deep-teal:hover, .btn-primary:hover {
+    background-color: var(--color-dark-teal) !important;
+    border-color: var(--color-dark-teal) !important;
+    color: var(--color-pure-white) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(12, 48, 47, 0.25);
+}
+
+.btn-clinical-green {
+    background-color: var(--color-clinical-green) !important;
+    border-color: var(--color-clinical-green) !important;
+    color: var(--color-pure-white) !important;
+}
+
+.btn-clinical-green:hover {
+    background-color: #5b846e !important;
+    border-color: #5b846e !important;
+    color: var(--color-pure-white) !important;
+    transform: translateY(-1px);
+}
+
+.btn-outline-teal {
+    background-color: transparent !important;
+    border: 1px solid var(--color-deep-teal) !important;
+    color: var(--color-deep-teal) !important;
+}
+
+.btn-outline-teal:hover {
+    background-color: var(--color-deep-teal) !important;
+    color: var(--color-pure-white) !important;
+    transform: translateY(-1px);
+}
+
+.btn-soft-mint {
+    background-color: var(--color-light-mint) !important;
+    border: 1px solid var(--color-soft-sage) !important;
+    color: var(--color-deep-teal) !important;
+}
+
+.btn-soft-mint:hover {
+    background-color: var(--color-soft-sage) !important;
+    color: var(--color-dark-teal) !important;
+}
+
+.btn-outline-secondary {
+    border-color: var(--color-border) !important;
+    color: var(--color-dark-text) !important;
+    background-color: var(--color-pure-white) !important;
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--color-warm-bg) !important;
+    border-color: var(--color-secondary-text) !important;
+    color: var(--color-deep-teal) !important;
+}
+
+.btn-sm {
+    padding: 0.45rem 0.95rem;
+    font-size: 0.8rem;
+    border-radius: var(--radius-sm);
+}
+
+.btn-lg {
+    padding: 0.85rem 1.85rem;
+    font-size: 1rem;
+    border-radius: var(--radius-md);
+}
+
+/* Card Component System */
+.card {
+    background-color: var(--color-pure-white);
+    border: 1px solid rgba(18, 63, 61, 0.05);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: var(--color-pure-white);
+    border-bottom: 1px solid rgba(18, 63, 61, 0.05);
+    padding: 1.35rem 2rem;
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.85rem 2rem;
+}
+
+.card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-elevated);
+}
+
+/* Form Inputs Refinement */
+.form-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-dark-text);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.01em;
+}
+
+.form-control, .form-select {
+    border: 1px solid var(--color-border);
+    background-color: var(--color-pure-white);
+    color: var(--color-dark-text);
+    border-radius: var(--radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.9rem;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-clinical-green);
+    box-shadow: 0 0 0 3px rgba(109, 151, 128, 0.18);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #9AA7A4;
+    font-weight: 400;
+}
+
+/* Badge System */
+.badge {
+    font-family: var(--font-body);
+    font-weight: 600;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+}
+
+.badge-role-admin {
+    background-color: #8D3A3A !important;
+    color: var(--color-pure-white) !important;
+}
+
+.badge-role-doctor {
+    background-color: var(--color-deep-teal) !important;
+    color: var(--color-pure-white) !important;
+}
+
+.badge-role-receptionist {
+    background-color: var(--color-clinical-green) !important;
+    color: var(--color-pure-white) !important;
+}
+
+.badge-role-nurse {
+    background-color: #4C726B !important;
+    color: var(--color-pure-white) !important;
+}
+
+.badge-success-subtle {
+    background-color: var(--color-success-bg) !important;
+    color: var(--color-success) !important;
+    border: 1px solid rgba(67, 133, 103, 0.2);
+}
+
+.badge-warning-subtle {
+    background-color: var(--color-warning-bg) !important;
+    color: var(--color-warning) !important;
+    border: 1px solid rgba(212, 156, 73, 0.2);
+}
+
+.badge-danger-subtle {
+    background-color: var(--color-danger-bg) !important;
+    color: var(--color-danger) !important;
+    border: 1px solid rgba(199, 91, 91, 0.2);
+}
+
+.badge-teal-subtle {
+    background-color: var(--color-light-mint) !important;
+    color: var(--color-deep-teal) !important;
+    border: 1px solid rgba(109, 151, 128, 0.25);
+}
+
+/* Scandinavian Pill & Icon Boxes */
+.icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-light-mint);
+    color: var(--color-deep-teal);
+    font-size: 1.25rem;
+}
+
+.icon-box-lg {
+    width: 58px;
+    height: 58px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-light-mint);
+    color: var(--color-deep-teal);
+    font-size: 1.6rem;
+}
+
+/* Micro-animations */
+@media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}

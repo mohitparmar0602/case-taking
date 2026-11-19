@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Configuration Settings | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Hospital Administration</span>
+            <h2 class="font-serif text-dark-teal mb-1">Institution & Global System Configuration</h2>
+            <p class="text-secondary small mb-0">Configure facility profile, patient identifier rules, contact channels, and compliance audit policies.</p>
+        </div>
+        <div>
+            <a href="{% url 'core:admin_dashboard' %}" class="btn btn-outline-teal btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-4 p-md-5">
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <h5 class="fw-bold text-dark-teal mb-3"><i class="bi bi-hospital text-clinical-green me-2"></i>Institutional Identity</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Hospital / Institution Full Name *</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Institution Code</label>
+                        {{ form.code }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Patient ID Prefix</label>
+                        {{ form.patient_id_prefix }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold text-secondary">Tagline / Mission Statement</label>
+                        {{ form.tagline }}
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark-teal mb-3 border-top pt-4"><i class="bi bi-telephone text-clinical-green me-2"></i>Contact Information & Location</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Official Email</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Phone Number</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Emergency Helpline</label>
+                        {{ form.emergency_helpline }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Address</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">City</label>
+                        {{ form.city }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">State</label>
+                        {{ form.state }}
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">Postal / PIN Code</label>
+                        {{ form.postal_code }}
+                    </div>
+                </div>
+
+                <h5 class="fw-bold text-dark-teal mb-3 border-top pt-4"><i class="bi bi-shield-check text-clinical-green me-2"></i>Clinical & Governance Rules</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Default Follow-up Duration (Days)</label>
+                        {{ form.default_follow_up_days }}
+                    </div>
+                    <div class="col-md-8 d-flex align-items-center">
+                        <div class="form-check form-switch mt-4">
+                            {{ form.enable_audit_trail }}
+                            <label class="form-check-label fw-semibold small text-secondary" for="{{ form.enable_audit_trail.id_for_label }}">
+                                Enable Strict System Audit Trail Logging
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-end border-top pt-4">
+                    <button type="submit" class="btn btn-deep-teal px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-check-lg me-1"></i>Save Institution Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

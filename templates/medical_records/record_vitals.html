@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Record Vital Signs | {{ patient.get_full_name }} ({{ patient.patient_id }}) | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Clinical Telemetry Intake</span>
+            <h2 class="font-serif text-dark-teal mb-1">Record Patient Vital Signs</h2>
+            <p class="text-secondary small mb-0">Patient: <strong class="text-dark-teal">{{ patient.get_full_name }}</strong> (PID: <span class="font-monospace text-deep-teal">{{ patient.patient_id }}</span> &bull; {{ patient.age }}y &bull; {{ patient.get_gender_display }})</p>
+        </div>
+        <div>
+            <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-teal btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to Patient
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Vitals Input Form -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-heart-pulse-fill text-clinical-green me-2"></i>Physical Measurements & Vital Parameters</h6>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Row 1: Blood Pressure & Heart Rate -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Systolic BP (mmHg)</label>
+                                {{ form.systolic_bp }}
+                                <small class="text-secondary" style="font-size: 0.72rem;">e.g. 120</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Diastolic BP (mmHg)</label>
+                                {{ form.diastolic_bp }}
+                                <small class="text-secondary" style="font-size: 0.72rem;">e.g. 80</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Pulse / Heart Rate (bpm)</label>
+                                {{ form.heart_rate }}
+                                <small class="text-secondary" style="font-size: 0.72rem;">Normal: 60-100 bpm</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 2: Temp, Respiratory, SpO2 -->
+                        <div class="row g-3 mb-4 border-top pt-4">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Body Temperature (°F)</label>
+                                {{ form.temperature_f }}
+                                <small class="text-secondary" style="font-size: 0.72rem;">Normal: 98.6 °F</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Respiratory Rate (breaths/min)</label>
+                                {{ form.respiratory_rate }}
+                                <small class="text-secondary" style="font-size: 0.72rem;">Normal: 12-20 bpm</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Oxygen Saturation - SpO2 (%)</label>
+                                {{ form.oxygen_saturation }}
+                                <small class="text-secondary" style="font-size: 0.72rem;">Normal: 95-100%</small>
+                            </div>
+                        </div>
+
+                        <!-- Row 3: Height, Weight & Live BMI Auto-calc -->
+                        <div class="row g-3 mb-4 border-top pt-4 align-items-center">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Height (cm)</label>
+                                {{ form.height_cm }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Weight (kg)</label>
+                                {{ form.weight_kg }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label d-block small fw-semibold text-secondary">Computed BMI</label>
+                                <div id="bmi_display" class="p-2 border rounded-3 bg-light text-center">
+                                    <span class="text-secondary small">Auto-calculates</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Row 4: Pain Score Slider -->
+                        <div class="mb-4 border-top pt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label small fw-semibold text-secondary mb-0">Pain Assessment Scale (0 - 10)</label>
+                                <span class="badge-clinical badge-status-confirmed fs-6" id="pain_score_value">0</span>
+                            </div>
+                            {{ form.pain_score }}
+                            <div class="d-flex justify-content-between text-secondary mt-1" style="font-size: 0.72rem;">
+                                <span>0 - No Pain</span>
+                                <span>5 - Moderate Pain</span>
+                                <span>10 - Worst Pain Possible</span>
+                            </div>
+                        </div>
+
+                        <!-- Row 5: Preliminary Observations -->
+                        <div class="mb-4 border-top pt-4">
+                            <label class="form-label small fw-semibold text-secondary">Intake Staff Preliminary Observations</label>
+                            {{ form.observations }}
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                            <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-teal px-4">Cancel</a>
+                            <button type="submit" class="btn btn-deep-teal px-4 fw-semibold shadow-sm">
+                                <i class="bi bi-check2-circle me-1"></i>Save Vital Signs Intake
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Measurements Sidebar -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-clock-history text-clinical-green me-2"></i>Prior Measurements</h6>
+                </div>
+                <div class="card-body p-3">
+                    {% for v in recent_vitals %}
+                    <div class="p-2.5 mb-2 rounded-3 border bg-light bg-opacity-50">
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span>{{ v.measurement_time|date:"d-M-Y H:i" }}</span>
+                            <span>{{ v.recorded_by.display_title|default:"Staff" }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-baseline">
+                            <span class="fw-bold text-dark-teal">BP: {{ v.blood_pressure_display }}</span>
+                            <span class="text-deep-teal small">Pulse: {{ v.heart_rate|default:"—" }} bpm</span>
+                            <span class="small text-secondary">SpO2: {{ v.oxygen_saturation|default:"—" }}%</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-secondary small text-center py-4">No previous vital records found for this patient.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

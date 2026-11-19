@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Reception & Intake Desk | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Front Desk & Intake</span>
+            <h2 class="font-serif text-dark-teal mb-1">Patient Reception & Coordination</h2>
+            <p class="text-secondary small mb-0">Welcome, {{ user.display_title }}. Register incoming patients, allocate OPD appointment slots, and manage waiting queues.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'patients:patient_create' %}" class="btn btn-deep-teal btn-sm shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i>New Patient Intake
+            </a>
+            <a href="{% url 'appointments:appointment_book' %}" class="btn btn-clinical-green btn-sm shadow-sm">
+                <i class="bi bi-calendar-plus me-1"></i>Book Appointment
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-4">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">New Registrations Today</div>
+                        <div class="stat-value">{{ total_registered_today }}</div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Walk-in & online</span>
+                    </div>
+                    <div class="stat-card-icon icon-teal">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Appointments Today</div>
+                        <div class="stat-value">{{ total_appointments_today }}</div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Total clinic queue</span>
+                    </div>
+                    <div class="stat-card-icon icon-green">
+                        <i class="bi bi-calendar2-day-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-4">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Awaiting Doctor Consultation</div>
+                        <div class="stat-value">{{ pending_checkins.count }}</div>
+                        <span class="badge-clinical badge-status-pending" style="font-size: 0.72rem;">In waiting area</span>
+                    </div>
+                    <div class="stat-card-icon icon-amber">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Queue & Available Doctors -->
+    <div class="row g-4 mb-4">
+        <!-- Today's Appointment Queue -->
+        <div class="col-lg-8">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-list-check text-clinical-green me-2"></i>Today's Clinic Appointment Queue</h6>
+                    <a href="{% url 'appointments:appointment_list' %}" class="small text-deep-teal fw-semibold text-decoration-none">All Appointments &rarr;</a>
+                </div>
+                <div class="clinical-table-wrap border-0">
+                    <table class="clinical-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Patient ID</th>
+                                <th>Patient Name</th>
+                                <th>Consulting Doctor</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for apt in today_appointments %}
+                            <tr>
+                                <td>
+                                    <span class="badge-clinical badge-status-confirmed">
+                                        {{ apt.appointment_time|time:"H:i" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{% url 'patients:patient_detail' apt.patient.pk %}" class="fw-bold text-deep-teal text-decoration-none">
+                                        {{ apt.patient.patient_id }}
+                                    </a>
+                                </td>
+                                <td class="fw-medium text-dark-teal">{{ apt.patient.get_full_name }}</td>
+                                <td class="text-secondary small">{{ apt.doctor.display_title }}</td>
+                                <td>
+                                    <span class="badge-clinical 
+                                        {% if apt.status == 'COMPLETED' %}badge-status-completed
+                                        {% elif apt.status == 'CONFIRMED' %}badge-status-confirmed
+                                        {% elif apt.status == 'CANCELLED' %}badge-status-cancelled
+                                        {% else %}badge-status-pending{% endif %}">
+                                        {{ apt.get_status_display }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{% url 'appointments:appointment_edit' apt.pk %}" class="btn btn-sm btn-outline-teal" title="Edit Appointment">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="text-center py-4 text-secondary">No appointments booked for today yet.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Consulting Doctors on Duty -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-person-badge text-clinical-green me-2"></i>Consulting Doctors on Duty</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="d-flex flex-column gap-3">
+                        {% for doc in doctors %}
+                        <div class="d-flex align-items-center justify-content-between p-2.5 rounded-3 border bg-light bg-opacity-50">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="user-avatar-pill" style="width: 36px; height: 36px;">
+                                    {{ doc.first_name|slice:":1" }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark-teal small">{{ doc.display_title }}</div>
+                                    <div class="text-secondary" style="font-size: 0.74rem;">{{ doc.profile.specialization|default:"General Medicine" }}</div>
+                                </div>
+                            </div>
+                            <a href="{% url 'appointments:appointment_book' %}?doctor={{ doc.pk }}" class="btn btn-sm btn-outline-teal" title="Book with this Doctor">
+                                Book
+                            </a>
+                        </div>
+                        {% empty %}
+                        <div class="text-muted small text-center py-3">No active doctors registered.</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Registrations Today -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 border-bottom">
+            <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-clock-history text-deep-teal me-2"></i>Today's Registered Patients</h6>
+            <a href="{% url 'patients:patient_list' %}" class="small text-deep-teal fw-semibold text-decoration-none">Search All Patients &rarr;</a>
+        </div>
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Full Name</th>
+                        <th>Age / Sex</th>
+                        <th>Contact Number</th>
+                        <th>Address / City</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in today_registrations %}
+                    <tr>
+                        <td><a href="{% url 'patients:patient_detail' p.pk %}" class="fw-bold text-deep-teal text-decoration-none">{{ p.patient_id }}</a></td>
+                        <td class="fw-medium text-dark-teal">{{ p.get_full_name }}</td>
+                        <td>{{ p.age }}y / {{ p.get_gender_display }}</td>
+                        <td>{{ p.phone_number }}</td>
+                        <td class="text-secondary small">{{ p.city }}, {{ p.state }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'appointments:appointment_book' %}?patient_id={{ p.pk }}" class="btn btn-sm btn-soft-mint me-1">
+                                <i class="bi bi-calendar-plus me-1"></i>Book Visit
+                            </a>
+                            <a href="{% url 'patients:patient_detail' p.pk %}" class="btn btn-sm btn-outline-teal">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4 text-secondary">No patient registrations recorded today so far.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

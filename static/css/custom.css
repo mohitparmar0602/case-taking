@@ -1,0 +1,111 @@
+/* ==========================================================================
+   MASTER HEALTHCARE CSS BUNDLE — CAREVIA / SMART INDIA HACKATHON 2026
+   PS ID: SIH26047
+   Aesthetic: Behance Scandinavian Clinical Healthcare (Deep Teal & Warm Sage)
+   ========================================================================== */
+
+@import url('design-system.css');
+@import url('dashboard.css');
+@import url('components.css');
+@import url('responsive.css');
+
+/* Backward Compatibility & Bootstrap Overrides */
+:root {
+    --primary: var(--color-deep-teal);
+    --primary-hover: var(--color-dark-teal);
+    --primary-light: var(--color-light-mint);
+    --secondary: var(--color-clinical-green);
+    --secondary-hover: #5A7E6B;
+    --bg-main: var(--color-warm-bg);
+    --card-bg: var(--color-pure-white);
+    --text-main: var(--color-dark-text);
+    --text-muted: var(--color-secondary-text);
+    --border-color: var(--color-border);
+    --sidebar-bg: var(--color-dark-teal);
+    --sidebar-text: rgba(255, 255, 255, 0.75);
+    --sidebar-hover: rgba(255, 255, 255, 0.08);
+    --sidebar-active: var(--color-clinical-green);
+}
+
+.btn-primary {
+    background-color: var(--color-deep-teal) !important;
+    border-color: var(--color-deep-teal) !important;
+    color: #FFFFFF !important;
+    border-radius: var(--radius-full) !important;
+    font-weight: 500 !important;
+    padding: 0.55rem 1.35rem !important;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--color-dark-teal) !important;
+    border-color: var(--color-dark-teal) !important;
+    box-shadow: 0 4px 12px rgba(18, 63, 61, 0.2) !important;
+}
+
+.btn-outline-primary {
+    border-color: var(--color-deep-teal) !important;
+    color: var(--color-deep-teal) !important;
+    border-radius: var(--radius-full) !important;
+    font-weight: 500 !important;
+    padding: 0.55rem 1.35rem !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--color-deep-teal) !important;
+    color: #FFFFFF !important;
+}
+
+.btn-success {
+    background-color: var(--color-clinical-green) !important;
+    border-color: var(--color-clinical-green) !important;
+    color: #FFFFFF !important;
+    border-radius: var(--radius-full) !important;
+    font-weight: 500 !important;
+}
+
+.btn-success:hover {
+    background-color: #5A7E6B !important;
+    border-color: #5A7E6B !important;
+}
+
+.bg-primary {
+    background-color: var(--color-deep-teal) !important;
+}
+
+.text-primary {
+    color: var(--color-deep-teal) !important;
+}
+
+.text-success {
+    color: var(--color-clinical-green) !important;
+}
+
+.card {
+    background-color: var(--color-pure-white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-subtle);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid var(--color-border);
+    padding: 1.1rem 1.5rem;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 1rem;
+    font-size: 0.92rem;
+    background-color: #FFFFFF;
+    color: var(--color-dark-text);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--color-clinical-green);
+    box-shadow: 0 0 0 3px rgba(109, 151, 128, 0.2);
+    outline: none;
+}

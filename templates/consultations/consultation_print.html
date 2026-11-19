@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Consultation Summary — {{ consultation.consultation_id }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { 
+            font-size: 12.5px; 
+            color: #202B29; 
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif; 
+            line-height: 1.5;
+            background-color: #F7F8F4;
+        }
+        .print-container { 
+            max-width: 820px; 
+            margin: 25px auto; 
+            padding: 35px; 
+            background: #FFFFFF;
+            border: 1px solid #E5EAE5; 
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(18, 63, 61, 0.05);
+        }
+        h4, h5, h6 {
+            color: #0C302F;
+        }
+        .text-teal {
+            color: #123F3D !important;
+        }
+        .font-serif {
+            font-family: 'DM Serif Display', Georgia, serif;
+        }
+        .table-custom thead th {
+            background-color: #F8FAF7;
+            color: #697874;
+            text-transform: uppercase;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+        }
+        @media print {
+            body { background: #FFFFFF !important; }
+            .no-print { display: none !important; }
+            .print-container { border: none; padding: 0; margin: 0; max-width: 100%; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="no-print bg-white border-bottom p-3 text-center mb-3">
+        <button class="btn btn-dark btn-sm me-2" style="background-color: #123F3D; border-color: #123F3D;" onclick="window.print()">Print Case Sheet</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="window.close()">Close Window</button>
+    </div>
+
+    <div class="print-container">
+        <!-- Hospital Header -->
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <div>
+                <h3 class="font-serif text-teal mb-0">{{ institution.name|default:"Carevia Medical Centre" }}</h3>
+                <div class="small text-muted">{{ institution.tagline|default:"Scandinavian Clinical Precision & Case-Taking" }}</div>
+                <div style="font-size: 11px;" class="text-secondary">{{ institution.address }}, {{ institution.city }}, {{ institution.state }} | Tel: {{ institution.phone }}</div>
+            </div>
+            <div class="text-end">
+                <span class="badge bg-light text-dark border font-monospace px-2.5 py-1.5" style="font-size: 12px;">{{ consultation.consultation_id }}</span>
+                <div class="small text-muted mt-1">Date: {{ consultation.created_at|date:"d-M-Y" }}</div>
+            </div>
+        </div>
+
+        <!-- Demographics Box -->
+        <div class="row g-2 border p-3 mb-3 rounded" style="background-color: #FAFBF9; font-size: 11.5px;">
+            <div class="col-4"><strong>Patient ID:</strong> <span class="font-monospace text-teal">{{ consultation.patient.patient_id }}</span></div>
+            <div class="col-4"><strong>Case Ref:</strong> {{ consultation.consultation_id }}</div>
+            <div class="col-4"><strong>Encounter:</strong> {{ consultation.created_at|date:"d-M-Y H:i" }}</div>
+            <div class="col-4"><strong>Name:</strong> {{ consultation.patient.get_full_name }}</div>
+            <div class="col-4"><strong>Age / Sex:</strong> {{ consultation.patient.age }}y / {{ consultation.patient.get_gender_display }}</div>
+            <div class="col-4"><strong>Blood Group:</strong> {{ consultation.patient.get_blood_group_display }}</div>
+            <div class="col-4"><strong>Phone:</strong> {{ consultation.patient.phone_number }}</div>
+            <div class="col-4"><strong>Attending:</strong> {{ consultation.doctor.display_title }}</div>
+            <div class="col-4"><strong>Specialty:</strong> {{ consultation.doctor.profile.specialization|default:"General Medicine" }}</div>
+        </div>
+
+        <!-- Vitals Strip -->
+        {% if latest_vital %}
+        <div class="border p-2.5 mb-3 text-center rounded bg-white" style="font-size: 11.5px;">
+            <span class="me-3"><strong>BP:</strong> {{ latest_vital.blood_pressure_display }}</span>
+            <span class="me-3"><strong>Pulse:</strong> {{ latest_vital.heart_rate|default:"—" }} bpm</span>
+            <span class="me-3"><strong>Temp:</strong> {{ latest_vital.temperature_f|default:"—" }} °F</span>
+            <span class="me-3"><strong>SpO2:</strong> {{ latest_vital.oxygen_saturation|default:"—" }}%</span>
+            <span class="me-3"><strong>BMI:</strong> {{ latest_vital.bmi|default:"—" }}</span>
+            <span><strong>Pain Score:</strong> {{ latest_vital.pain_score }}/10</span>
+        </div>
+        {% endif %}
+
+        <!-- Chief Complaints -->
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-1 text-teal">1. Chief Complaints & Presentation</h6>
+            <p class="mb-1">{{ consultation.chief_complaints }}</p>
+            {% if consultation.history_of_present_illness %}
+            <p class="mb-0 text-muted small"><strong>HPI:</strong> {{ consultation.history_of_present_illness }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Examination Findings -->
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-1 text-teal">2. Clinical Examination</h6>
+            <div class="row">
+                <div class="col-6"><p class="mb-0"><strong>General:</strong> {{ consultation.general_examination|default:"Normal" }}</p></div>
+                <div class="col-6"><p class="mb-0"><strong>Systemic:</strong> {{ consultation.systemic_examination|default:"CVS/RS clear" }}</p></div>
+            </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-1 text-teal">3. Diagnosis</h6>
+            <p class="mb-1"><strong>Final Diagnosis:</strong> {{ consultation.final_diagnosis|default:consultation.provisional_diagnosis }}</p>
+            {% if consultation.provisional_diagnosis and consultation.final_diagnosis %}
+            <p class="mb-0 small text-muted"><strong>Provisional Diagnosis:</strong> {{ consultation.provisional_diagnosis }}</p>
+            {% endif %}
+        </div>
+
+        <!-- Prescriptions -->
+        {% if prescription and prescription.items.exists %}
+        <div class="mb-3">
+            <h6 class="fw-bold border-bottom pb-1 text-teal">4. Prescribed Medications (Rx)</h6>
+            <table class="table table-bordered table-sm table-custom" style="font-size: 11px;">
+                <thead>
+                    <tr>
+                        <th>#</th><th>Medicine</th><th>Form</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in prescription.items.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><strong>{{ item.medicine_name }}</strong></td>
+                        <td>{{ item.get_dosage_form_display }}</td>
+                        <td>{{ item.strength_dosage }}</td>
+                        <td>{{ item.frequency }} - {{ item.get_timing_display }}</td>
+                        <td>{{ item.duration }}</td>
+                        <td class="text-secondary">{{ item.instructions|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% if prescription.general_advice %}
+            <p class="small mb-0"><strong>Advice:</strong> {{ prescription.general_advice }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Treatment Plan & Follow Up -->
+        <div class="mb-4">
+            <h6 class="fw-bold border-bottom pb-1 text-teal">5. Treatment & Investigations</h6>
+            {% if consultation.treatment_plan %}<p class="mb-1"><strong>Plan:</strong> {{ consultation.treatment_plan }}</p>{% endif %}
+            {% if consultation.recommended_investigations %}<p class="mb-1"><strong>Recommended Tests:</strong> {{ consultation.recommended_investigations }}</p>{% endif %}
+            {% if consultation.dietary_lifestyle_advice %}<p class="mb-1"><strong>Diet / Lifestyle:</strong> {{ consultation.dietary_lifestyle_advice }}</p>{% endif %}
+            {% if consultation.follow_up_date %}<p class="mb-0 fw-bold text-teal">Follow-up Visit Date: {{ consultation.follow_up_date|date:"d-M-Y" }}</p>{% endif %}
+        </div>
+
+        <!-- Signature -->
+        <div class="d-flex justify-content-between align-items-end pt-4 border-top mt-4">
+            <div style="font-size: 10px;" class="text-muted">
+                Status: {% if consultation.is_finalized %}<strong class="text-success">Finalized & Signed</strong>{% else %}<strong class="text-warning">Draft Record</strong>{% endif %}<br>
+                Smart India Hackathon 2026 &bull; PS ID: SIH26047 &bull; Patient Case-Taking Software
+            </div>
+            <div class="text-end">
+                <div class="fw-bold text-teal font-serif">{{ consultation.doctor.display_title }}</div>
+                <div style="font-size: 10px;" class="text-muted">{{ consultation.doctor.profile.specialization|default:"Consultant Physician" }}</div>
+                <div style="font-size: 10px;" class="text-muted">License: {{ consultation.doctor.profile.license_number|default:"MCI Reg" }}</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

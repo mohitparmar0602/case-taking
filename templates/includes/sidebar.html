@@ -1,0 +1,136 @@
+<div id="sidebar" class="d-none d-md-flex flex-column">
+    <!-- Brand -->
+    <div class="brand d-flex align-items-center gap-2">
+        <div class="brand-icon">
+            <i class="bi bi-heart-pulse-fill"></i>
+        </div>
+        <div class="overflow-hidden">
+            <h6 class="mb-0 text-white fw-bold text-truncate font-serif" style="font-size: 1.15rem; letter-spacing: -0.01em;">Carevia</h6>
+            <small class="text-white-50 d-block text-truncate" style="font-size: 0.72rem; letter-spacing: 0.04em;">CASE-TAKING PLATFORM</small>
+        </div>
+    </div>
+
+    <!-- Navigation Links -->
+    <div class="flex-grow-1 overflow-auto py-2">
+        <div class="nav-section-title">Clinical Workspace</div>
+        <a href="{% url 'core:dashboard' %}" class="nav-link {% if request.resolver_match.app_name == 'core' and request.resolver_match.url_name != 'settings' %}active{% endif %}">
+            <i class="bi bi-grid-1x2"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <div class="nav-section-title">Patient Records</div>
+        <a href="{% url 'patients:patient_list' %}" class="nav-link {% if request.resolver_match.app_name == 'patients' and request.resolver_match.url_name == 'patient_list' %}active{% endif %}">
+            <i class="bi bi-people"></i>
+            <span>Patient Directory</span>
+        </a>
+        {% if not is_nurse %}
+        <a href="{% url 'patients:patient_create' %}" class="nav-link {% if request.resolver_match.app_name == 'patients' and request.resolver_match.url_name == 'patient_create' %}active{% endif %}">
+            <i class="bi bi-person-plus"></i>
+            <span>Register Patient</span>
+        </a>
+        {% endif %}
+
+        <div class="nav-section-title">Case-Taking & Clinical</div>
+        <a href="{% url 'consultations:consultation_list' %}" class="nav-link {% if request.resolver_match.app_name == 'consultations' %}active{% endif %}">
+            <i class="bi bi-clipboard2-pulse"></i>
+            <span>Consultations</span>
+        </a>
+        {% if is_doctor or is_admin %}
+        <a href="{% url 'consultations:consultation_create' %}" class="nav-link">
+            <i class="bi bi-file-earmark-medical"></i>
+            <span>New Case-Taking</span>
+        </a>
+        {% endif %}
+
+        <div class="nav-section-title">Scheduling</div>
+        <a href="{% url 'appointments:appointment_list' %}" class="nav-link {% if request.resolver_match.app_name == 'appointments' and request.resolver_match.url_name == 'appointment_list' %}active{% endif %}">
+            <i class="bi bi-calendar2-check"></i>
+            <span>Appointments</span>
+        </a>
+        <a href="{% url 'appointments:appointment_book' %}" class="nav-link {% if request.resolver_match.app_name == 'appointments' and request.resolver_match.url_name == 'appointment_book' %}active{% endif %}">
+            <i class="bi bi-calendar-plus"></i>
+            <span>Book Appointment</span>
+        </a>
+
+        {% if is_admin %}
+        <div class="nav-section-title">Governance & Administration</div>
+        <a href="{% url 'accounts:staff_list' %}" class="nav-link {% if request.resolver_match.app_name == 'accounts' and 'staff' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="bi bi-person-badge"></i>
+            <span>Staff Directory</span>
+        </a>
+        <a href="{% url 'reports:dashboard' %}" class="nav-link {% if request.resolver_match.app_name == 'reports' %}active{% endif %}">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Reports & Analytics</span>
+        </a>
+        <a href="{% url 'audit:audit_list' %}" class="nav-link {% if request.resolver_match.app_name == 'audit' %}active{% endif %}">
+            <i class="bi bi-journal-text"></i>
+            <span>Audit Trail Logs</span>
+        </a>
+        <a href="{% url 'core:settings' %}" class="nav-link {% if request.resolver_match.app_name == 'core' and request.resolver_match.url_name == 'settings' %}active{% endif %}">
+            <i class="bi bi-sliders"></i>
+            <span>Hospital Settings</span>
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- User Quick Info & Sign Out Footer -->
+    <div class="sidebar-footer">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <div class="user-avatar-pill">
+                    {{ user.first_name|default:user.username|slice:":1"|upper }}
+                </div>
+                <div class="text-truncate">
+                    <div class="small fw-semibold text-white text-truncate">{{ user.display_title }}</div>
+                    <div class="text-white-50 text-truncate" style="font-size: 0.72rem;">{{ user_role_label }}</div>
+                </div>
+            </div>
+            <a href="{% url 'accounts:logout' %}" class="text-danger p-1" title="Sign Out">
+                <i class="bi bi-box-arrow-right fs-5"></i>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Offcanvas Sidebar -->
+<div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas" style="width: 280px; background-color: var(--color-dark-teal) !important;">
+    <div class="offcanvas-header border-bottom border-light border-opacity-10">
+        <h5 class="offcanvas-title text-white d-flex align-items-center gap-2 font-serif">
+            <span class="brand-icon" style="width: 32px; height: 32px; font-size: 1rem;"><i class="bi bi-heart-pulse-fill"></i></span> Carevia Platform
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+        <div class="py-2">
+            <a href="{% url 'core:dashboard' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-grid-1x2"></i> Dashboard
+            </a>
+            <a href="{% url 'patients:patient_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-people"></i> Patient Directory
+            </a>
+            <a href="{% url 'consultations:consultation_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-clipboard2-pulse"></i> Consultations
+            </a>
+            <a href="{% url 'appointments:appointment_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-calendar2-check"></i> Appointments
+            </a>
+            {% if is_admin %}
+            <a href="{% url 'accounts:staff_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-person-badge"></i> Staff Directory
+            </a>
+            <a href="{% url 'reports:dashboard' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-graph-up-arrow"></i> Reports & Analytics
+            </a>
+            <a href="{% url 'audit:audit_list' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-journal-text"></i> Audit Trail
+            </a>
+            {% endif %}
+            <a href="{% url 'accounts:profile' %}" class="nav-link text-white-50 px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-person-gear"></i> Profile & Password
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="nav-link text-danger px-3 py-2 d-flex align-items-center gap-2">
+                <i class="bi bi-box-arrow-right"></i> Sign Out
+            </a>
+        </div>
+    </div>
+</div>

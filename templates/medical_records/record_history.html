@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Record Structured Medical History | {{ patient.get_full_name }} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Clinical Anamnesis</span>
+            <h2 class="font-serif text-dark-teal mb-1">Structured Patient Medical History</h2>
+            <p class="text-secondary small mb-0">Patient: <strong class="text-dark-teal">{{ patient.get_full_name }}</strong> (PID: <span class="font-monospace text-deep-teal">{{ patient.patient_id }}</span> &bull; {{ patient.age }}y / {{ patient.get_gender_display }})</p>
+        </div>
+        <div>
+            <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-teal btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back to Patient
+            </a>
+        </div>
+    </div>
+
+    <!-- History Form -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-4 p-md-5">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Section A: Chief Complaints -->
+                <div class="card mb-4 border" style="border-radius: var(--radius-md);">
+                    <div class="card-header bg-light py-2.5 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-1-circle-fill text-clinical-green me-2"></i>Section A: Chief Complaints & Symptoms</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Primary Chief Complaint *</label>
+                                {{ form.chief_complaint }}
+                                {% if form.chief_complaint.errors %}<div class="text-danger small mt-1">{{ form.chief_complaint.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary">Duration *</label>
+                                {{ form.duration }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary">Onset</label>
+                                {{ form.onset }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary">Severity Level</label>
+                                {{ form.severity }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary">Frequency</label>
+                                {{ form.frequency }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Associated Symptoms</label>
+                                {{ form.associated_symptoms }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section B: History of Present Illness (HPI) -->
+                <div class="card mb-4 border" style="border-radius: var(--radius-md);">
+                    <div class="card-header bg-light py-2.5 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-2-circle-fill text-clinical-green me-2"></i>Section B: History of Present Illness (HPI)</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Detailed Chronological Description of Illness *</label>
+                                {{ form.hpi_description }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Progression</label>
+                                {{ form.progression }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Aggravating Factors</label>
+                                {{ form.aggravating_factors }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Relieving Factors</label>
+                                {{ form.relieving_factors }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Additional Observations</label>
+                                {{ form.related_observations }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section C & D: Past Medical & Surgical History -->
+                <div class="card mb-4 border" style="border-radius: var(--radius-md);">
+                    <div class="card-header bg-light py-2.5 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-3-circle-fill text-clinical-green me-2"></i>Sections C & D: Past Medical & Surgical History</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Previous Illnesses</label>
+                                {{ form.previous_illnesses }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Chronic Conditions</label>
+                                {{ form.chronic_conditions }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Previous Hospitalizations</label>
+                                {{ form.previous_hospitalizations }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Past Surgical History (Surgeries, Dates, Hospital)</label>
+                                {{ form.past_surgeries }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section E & F: Family & Personal Habits -->
+                <div class="card mb-4 border" style="border-radius: var(--radius-md);">
+                    <div class="card-header bg-light py-2.5 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-4-circle-fill text-clinical-green me-2"></i>Sections E & F: Family & Personal Social History</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Family Medical History</label>
+                                {{ form.family_medical_history }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Smoking Status</label>
+                                {{ form.smoking_history }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Alcohol Consumption</label>
+                                {{ form.alcohol_history }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-secondary">Dietary Habits</label>
+                                {{ form.dietary_habits }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Sleep Patterns</label>
+                                {{ form.sleep_patterns }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Physical Activity Level</label>
+                                {{ form.physical_activity }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section G & H: Allergy & Routine Medication History -->
+                <div class="card mb-4 border" style="border-radius: var(--radius-md);">
+                    <div class="card-header bg-light py-2.5 border-bottom">
+                        <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-5-circle-fill text-clinical-green me-2"></i>Sections G & H: Allergy History & Current Routine Medications</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Known Allergies (Drug / Food / Environmental)</label>
+                                {{ form.known_allergies }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-secondary">Allergy Severity</label>
+                                {{ form.allergy_severity }}
+                            </div>
+                            <div class="col-md-3 d-flex align-items-center">
+                                <div class="form-check mt-3">
+                                    {{ form.is_allergy_unknown }}
+                                    <label class="form-check-label fw-semibold small text-secondary" for="{{ form.is_allergy_unknown.id_for_label }}">
+                                        No Known Allergies (NKA)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">Current Routine Medications & Dosages</label>
+                                {{ form.current_medications }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                    <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-teal px-4">Cancel</a>
+                    <button type="submit" class="btn btn-deep-teal px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-check-circle me-1"></i>Save Structured Medical History
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Management | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Personnel & Access</span>
+            <h2 class="font-serif text-dark-teal mb-1">Healthcare Staff & Access Control</h2>
+            <p class="text-secondary small mb-0">Supervise institutional accounts, role allocations, credentials, and active statuses.</p>
+        </div>
+        <div>
+            <a href="{% url 'accounts:staff_create' %}" class="btn btn-deep-teal btn-sm shadow-sm">
+                <i class="bi bi-person-plus-fill me-1"></i>Add Staff Member
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters & Search Bar -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-secondary"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Search by name, employee ID, or username..." value="{{ query }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="role" class="form-select">
+                        <option value="">All Roles</option>
+                        {% for code, label in roles %}
+                        <option value="{{ code }}" {% if selected_role == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if selected_status == 'inactive' %}selected{% endif %}>Deactivated</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-deep-teal w-100">Filter</button>
+                    {% if query or selected_role or selected_status %}
+                    <a href="{% url 'accounts:staff_list' %}" class="btn btn-outline-teal" title="Reset Filters"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Staff Table -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Staff Name & Title</th>
+                        <th>Role & Department</th>
+                        <th>Contact</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in staff_members %}
+                    <tr>
+                        <td>
+                            <span class="font-monospace fw-semibold text-deep-teal">{{ s.profile.employee_id|default:"N/A" }}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar-pill me-2" style="width: 36px; height: 36px;">
+                                    {{ s.first_name|default:s.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <div class="fw-semibold text-dark-teal">{{ s.display_title }}</div>
+                                    <small class="text-secondary font-monospace">@{{ s.username }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-clinical 
+                                {% if s.role == 'ADMIN' %}badge-role-admin
+                                {% elif s.role == 'DOCTOR' %}badge-role-doctor
+                                {% elif s.role == 'RECEPTIONIST' %}badge-role-receptionist
+                                {% else %}badge-role-nurse{% endif %} mb-1">
+                                {{ s.get_role_display }}
+                            </span>
+                            <div class="small text-secondary">{{ s.profile.department|default:"General" }}</div>
+                        </td>
+                        <td>
+                            <div class="small text-dark-teal">{{ s.email|default:"No email" }}</div>
+                            <div class="small text-secondary">{{ s.phone|default:"No phone" }}</div>
+                        </td>
+                        <td>
+                            {% if s.is_active %}
+                            <span class="badge-clinical badge-status-completed">
+                                <i class="bi bi-check-circle me-1"></i>Active
+                            </span>
+                            {% else %}
+                            <span class="badge-clinical badge-status-cancelled">
+                                <i class="bi bi-x-circle me-1"></i>Deactivated
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{% url 'accounts:staff_edit' s.pk %}" class="btn btn-sm btn-outline-teal" title="Edit Staff Member">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if s != user %}
+                                <a href="{% url 'accounts:staff_toggle' s.pk %}" class="btn btn-sm {% if s.is_active %}btn-outline-danger{% else %}btn-soft-mint text-dark-teal{% endif %}" onclick="return confirm('Change active status for this staff member?');">
+                                    {% if s.is_active %}Deactivate{% else %}Activate{% endif %}
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-secondary">
+                            <i class="bi bi-people fs-1 d-block mb-2 text-muted"></i>
+                            No staff records matched the specified filter criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

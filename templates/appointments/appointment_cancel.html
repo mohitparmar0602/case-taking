@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Cancel Appointment | {{ appointment.appointment_id }} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-6">
+        <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-danger"><i class="bi bi-x-circle me-2"></i>Cancel Patient Appointment</h5>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <div class="p-3 border rounded-3 mb-4" style="background-color: var(--color-warm-bg);">
+                    <div class="mb-1"><strong class="text-dark-teal">Appointment ID:</strong> <span class="font-monospace text-deep-teal">{{ appointment.appointment_id }}</span></div>
+                    <div class="mb-1"><strong class="text-dark-teal">Patient:</strong> {{ appointment.patient.get_full_name }} (<span class="font-monospace">{{ appointment.patient.patient_id }}</span>)</div>
+                    <div class="mb-1"><strong class="text-dark-teal">Doctor:</strong> {{ appointment.doctor.display_title }}</div>
+                    <div><strong class="text-dark-teal">Scheduled For:</strong> {{ appointment.appointment_date|date:"d-M-Y" }} at {{ appointment.appointment_time|time:"H:i" }}</div>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary">Reason for Cancellation *</label>
+                        {{ form.cancellation_reason }}
+                        <small class="text-secondary d-block mt-1" style="font-size: 0.74rem;">Document clinical or administrative reason for cancellation (required for audit trail).</small>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'appointments:appointment_list' %}" class="btn btn-outline-teal px-4">Back</a>
+                        <button type="submit" class="btn btn-outline-danger px-4 fw-semibold">
+                            <i class="bi bi-check-lg me-1"></i>Confirm Cancellation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

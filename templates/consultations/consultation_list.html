@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Clinical Case Records | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Clinical Documentation</span>
+            <h2 class="font-serif text-dark-teal mb-1">Patient Consultations & Case Sheets</h2>
+            <p class="text-secondary small mb-0">Browse electronic case-taking records, physician evaluations, and signed clinical summaries.</p>
+        </div>
+        <div>
+            {% if is_doctor or is_admin %}
+            <a href="{% url 'consultations:consultation_create' %}" class="btn btn-deep-teal btn-sm shadow-sm">
+                <i class="bi bi-file-earmark-medical me-1"></i>New Case-Taking
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Simplified Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-secondary"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Search by case ID, patient name, PID, or diagnosis..." value="{{ query }}">
+                    </div>
+                </div>
+                <div class="col-md-3 col-lg-3">
+                    <select name="status" class="form-select">
+                        <option value="">All Statuses</option>
+                        {% for code, label in statuses %}
+                        <option value="{{ code }}" {% if selected_status == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 col-lg-2">
+                    <input type="date" name="date" class="form-control" value="{{ selected_date }}" title="Filter by date">
+                </div>
+                <div class="col-md-12 col-lg-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-deep-teal w-100">Filter</button>
+                    {% if query or selected_date or selected_status %}
+                    <a href="{% url 'consultations:consultation_list' %}" class="btn btn-outline-teal" title="Clear Filters">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Streamlined Consultations Table -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+            <h6 class="mb-0 fw-bold text-dark-teal">
+                <i class="bi bi-clipboard2-pulse text-clinical-green me-2"></i>Documented Case Records ({{ page_obj.paginator.count }})
+            </h6>
+        </div>
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th>Case Reference</th>
+                        <th>Patient</th>
+                        <th>Attending Doctor</th>
+                        <th>Clinical Diagnosis</th>
+                        <th>Encounter Date</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in page_obj %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'consultations:consultation_detail' c.pk %}" class="fw-bold text-deep-teal text-decoration-none font-monospace">
+                                {{ c.consultation_id }}
+                            </a>
+                        </td>
+                        <td class="fw-medium text-dark-teal">
+                            <a href="{% url 'patients:patient_detail' c.patient.pk %}" class="text-dark-teal text-decoration-none">
+                                {{ c.patient.get_full_name }}
+                            </a>
+                            <small class="text-secondary d-block font-monospace">({{ c.patient.patient_id }})</small>
+                        </td>
+                        <td class="text-secondary small">{{ c.doctor.display_title }}</td>
+                        <td>
+                            <span class="small fw-semibold text-dark-teal d-block">
+                                {{ c.final_diagnosis|default:c.provisional_diagnosis|default:"Pending Diagnosis" }}
+                            </span>
+                            <small class="text-secondary" style="font-size: 0.75rem;">{{ c.chief_complaints|truncatechars:45 }}</small>
+                        </td>
+                        <td class="text-secondary small">{{ c.created_at|date:"d-M-Y H:i" }}</td>
+                        <td>
+                            <span class="badge-clinical {% if c.is_finalized %}badge-status-completed{% else %}badge-status-pending{% endif %}">
+                                {% if c.is_finalized %}Finalized{% else %}Draft{% endif %}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{% url 'consultations:consultation_detail' c.pk %}" class="btn btn-sm btn-outline-teal px-2 py-1" title="View Case Sheet">
+                                    <i class="bi bi-eye me-1"></i>View
+                                </a>
+                                <a href="{% url 'consultations:consultation_pdf' c.pk %}" class="btn btn-sm btn-outline-danger px-2 py-1" target="_blank" title="Download PDF">
+                                    <i class="bi bi-file-earmark-pdf"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-secondary">
+                            <i class="bi bi-clipboard2-x fs-1 d-block mb-2 text-muted"></i>
+                            No consultation records match the specified filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <div class="card-footer bg-white py-3 border-top d-flex justify-content-between align-items-center">
+            <small class="text-secondary">Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">&laquo;</a></li>
+                    {% endif %}
+                    {% for n in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == n %}active{% endif %}">
+                        <a class="page-link" href="?page={{ n }}{% if query %}&q={{ query }}{% endif %}">{{ n }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}">&raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

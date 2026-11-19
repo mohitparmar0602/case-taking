@@ -1,0 +1,116 @@
+/* ==========================================================================
+   RESPONSIVE DESIGN ADAPTATIONS
+   Smart India Hackathon 2026 | PS ID: SIH26047
+   Supports: 1440px+, 1200px, 992px, 768px, 480px, 390px
+   ========================================================================== */
+
+/* Large Screens (1440px and up) */
+@media (min-width: 1440px) {
+    .container, .container-lg, .container-xl, .container-xxl {
+        max-width: 1360px;
+    }
+}
+
+/* Medium Screens & Tablets (max-width: 991.98px) */
+@media (max-width: 991.98px) {
+    #sidebar {
+        display: none !important;
+    }
+
+    #main-content {
+        width: 100% !important;
+    }
+
+    .hero-image {
+        height: 380px;
+        margin-top: 2rem;
+    }
+
+    .hero-floating-card {
+        bottom: -10px;
+        left: 10px;
+    }
+
+    .hero-floating-badge {
+        top: 10px;
+        right: 10px;
+    }
+
+    .stat-card-clinical {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Mobile Screens (max-width: 767.98px) */
+@media (max-width: 767.98px) {
+    html {
+        font-size: 14px;
+    }
+
+    .hero-title {
+        font-size: 2.2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-image {
+        height: 280px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .philosophy-banner {
+        padding: 2.5rem 1.5rem;
+        margin: 2.5rem 0;
+    }
+
+    .philosophy-quote {
+        font-size: 1.5rem;
+    }
+
+    .dashboard-topbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .topbar-search {
+        display: none;
+    }
+
+    .clinical-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nav-clinical-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        padding-bottom: 0.5rem;
+    }
+
+    .stat-card-clinical .stat-value {
+        font-size: 1.75rem;
+    }
+}
+
+/* Very Small Mobile Screens (max-width: 400px) */
+@media (max-width: 400px) {
+    .btn-deep-teal, .btn-clinical-green, .btn-soft-mint {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+
+    .hero-floating-card {
+        display: none;
+    }
+}

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Reporting & Analytics | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header with Export Actions -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Clinical Intelligence</span>
+            <h2 class="font-serif text-dark-teal mb-1">Clinical Reports & Operations Analytics</h2>
+            <p class="text-secondary small mb-0">Aggregate performance metrics, physician caseloads, patient intake trends, and data exports.</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{% url 'reports:export_patients_csv' %}" class="btn btn-outline-teal btn-sm shadow-sm">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Patients CSV
+            </a>
+            <a href="{% url 'reports:export_consultations_csv' %}" class="btn btn-outline-teal btn-sm shadow-sm">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>Consultations CSV
+            </a>
+            <a href="{% url 'reports:export_summary_pdf' %}" class="btn btn-deep-teal btn-sm shadow-sm" target="_blank">
+                <i class="bi bi-file-earmark-pdf me-1"></i>Summary PDF
+            </a>
+        </div>
+    </div>
+
+    <!-- Compact Date Range & Filter Bar -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-sm-6 col-md-3">
+                    <input type="date" name="from_date" class="form-control form-control-sm" value="{{ start_date|date:'Y-m-d' }}" title="Start Date">
+                </div>
+                <div class="col-sm-6 col-md-3">
+                    <input type="date" name="to_date" class="form-control form-control-sm" value="{{ end_date|date:'Y-m-d' }}" title="End Date">
+                </div>
+                <div class="col-sm-8 col-md-4">
+                    <select name="doctor" class="form-select form-select-sm">
+                        <option value="">All Consulting Physicians</option>
+                        {% for d in doctors %}
+                        <option value="{{ d.pk }}" {% if selected_doctor == d.pk|stringformat:"i" %}selected{% endif %}>{{ d.display_title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-sm-4 col-md-2">
+                    <button type="submit" class="btn btn-deep-teal btn-sm w-100">
+                        <i class="bi bi-funnel me-1"></i>Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4 Clean Metric Cards Grid -->
+    <div class="row g-3 mb-4">
+        <!-- Patient Registrations -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Patient Registrations</div>
+                        <div class="stat-value">{{ total_reg }}</div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Selected Window</span>
+                    </div>
+                    <div class="stat-card-icon icon-teal">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Consultations -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Total Consultations</div>
+                        <div class="stat-value">{{ total_con }}</div>
+                        <span class="badge-clinical badge-status-completed" style="font-size: 0.72rem;">{{ completed_con }} Finalized</span>
+                    </div>
+                    <div class="stat-card-icon icon-green">
+                        <i class="bi bi-clipboard2-pulse-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointments Booked -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Appointments Booked</div>
+                        <div class="stat-value">{{ total_apt }}</div>
+                        <span class="badge-clinical badge-status-pending" style="font-size: 0.72rem;">{{ cancelled_apt }} Cancelled</span>
+                    </div>
+                    <div class="stat-card-icon icon-amber">
+                        <i class="bi bi-calendar2-check-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finalization Rate -->
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Finalization Rate</div>
+                        <div class="stat-value">
+                            {% if total_con > 0 %}
+                            {% widthratio completed_con total_con 100 %}%
+                            {% else %}100%{% endif %}
+                        </div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Signed & Locked</span>
+                    </div>
+                    <div class="stat-card-icon icon-teal">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Analytics Split -->
+    <div class="row g-4">
+        <!-- Physician Productivity Table -->
+        <div class="col-lg-8">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold text-dark-teal">
+                        <i class="bi bi-person-lines-fill text-clinical-green me-2"></i>Physician Caseload & Productivity
+                    </h6>
+                    <span class="small text-secondary">{{ doctors.count }} Active Physicians</span>
+                </div>
+                <div class="clinical-table-wrap border-0">
+                    <table class="clinical-table">
+                        <thead>
+                            <tr>
+                                <th>Physician Name</th>
+                                <th>Specialty & Department</th>
+                                <th class="text-center">Cases Documented</th>
+                                <th class="text-end">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in doctors %}
+                            <tr>
+                                <td>
+                                    <strong class="text-dark-teal d-block">{{ doc.display_title }}</strong>
+                                    <small class="text-secondary font-monospace" style="font-size: 0.72rem;">{{ doc.email|default:doc.username }}</small>
+                                </td>
+                                <td>
+                                    <span class="fw-medium text-dark-teal">{{ doc.profile.specialization|default:"General Medicine" }}</span>
+                                    <small class="text-secondary d-block">{{ doc.profile.department|default:"OPD" }}</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark-teal border px-3 py-1 font-monospace fw-bold">
+                                        {{ doc.doctor_consultations.count }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge-clinical badge-status-completed">Active Duty</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="text-center py-4 text-secondary">No physician records available.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Institutional Health & Operations Summary -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal">
+                        <i class="bi bi-bar-chart-line text-clinical-green me-2"></i>Operational Summary
+                    </h6>
+                </div>
+                <div class="card-body p-3 d-flex flex-column gap-3">
+                    <!-- Case Documentation Status -->
+                    <div class="p-3 rounded-3" style="background-color: var(--color-warm-bg); border: 1px solid #E2E8F0;">
+                        <span class="small text-secondary fw-semibold text-uppercase d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                            Documentation Integrity
+                        </span>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-dark-teal">Finalized & Locked</span>
+                            <span class="badge-clinical badge-status-completed">{{ completed_con }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-secondary">Active Drafts</span>
+                            <span class="badge-clinical badge-status-pending">
+                                {% if total_con >= completed_con %}
+                                {{ total_con|add:"-"|add:completed_con }}
+                                {% else %}0{% endif %}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Appointment Fulfillment -->
+                    <div class="p-3 rounded-3" style="background-color: var(--color-warm-bg); border: 1px solid #E2E8F0;">
+                        <span class="small text-secondary fw-semibold text-uppercase d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                            Appointment Fulfillment
+                        </span>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-dark-teal">Total Booked</span>
+                            <strong class="font-monospace text-dark-teal">{{ total_apt }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="small text-secondary">Cancellations</span>
+                            <span class="badge-clinical badge-status-cancelled">{{ cancelled_apt }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Export Direct Links -->
+                    <div class="p-3 rounded-3 mt-auto" style="background-color: #FFFFFF; border: 1px solid #E2E8F0;">
+                        <span class="small text-secondary fw-semibold text-uppercase d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                            Export Archives
+                        </span>
+                        <div class="d-flex flex-column gap-2">
+                            <a href="{% url 'reports:export_patients_csv' %}" class="btn btn-outline-teal btn-sm text-start d-flex align-items-center justify-content-between p-2 rounded-2">
+                                <span><i class="bi bi-file-earmark-spreadsheet me-2 text-clinical-green"></i>Download Master Patients CSV</span>
+                                <i class="bi bi-download text-muted small"></i>
+                            </a>
+                            <a href="{% url 'reports:export_consultations_csv' %}" class="btn btn-outline-teal btn-sm text-start d-flex align-items-center justify-content-between p-2 rounded-2">
+                                <span><i class="bi bi-file-earmark-spreadsheet me-2 text-clinical-green"></i>Download Consultations CSV</span>
+                                <i class="bi bi-download text-muted small"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

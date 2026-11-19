@@ -1,0 +1,676 @@
+{% extends "base.html" %}
+
+{% block title %}{{ patient.get_full_name }} ({{ patient.patient_id }}) — Patient Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Top Patient Banner Card -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="user-avatar-pill shadow-sm" style="width: 60px; height: 60px; font-size: 1.5rem;">
+                        {{ patient.first_name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <h2 class="font-serif text-dark-teal mb-0">{{ patient.get_full_name }}</h2>
+                            <span class="badge-clinical badge-status-confirmed font-monospace fs-6">{{ patient.patient_id }}</span>
+                            <span class="badge-clinical badge-status-cancelled">{{ patient.get_blood_group_display }}</span>
+                        </div>
+                        <div class="text-secondary small mt-1 d-flex flex-wrap gap-3">
+                            <span><i class="bi bi-person me-1"></i>{{ patient.age }} Years &bull; {{ patient.get_gender_display }}</span>
+                            <span><i class="bi bi-telephone me-1"></i>{{ patient.phone_number }}</span>
+                            <span><i class="bi bi-geo-alt me-1"></i>{{ patient.city }}, {{ patient.state }}</span>
+                            <span><i class="bi bi-calendar-check me-1"></i>Reg: {{ patient.created_at|date:"d-M-Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Action Buttons -->
+                <div class="d-flex flex-wrap gap-2">
+                    {% if is_doctor or is_admin %}
+                    <a href="{% url 'consultations:consultation_create' %}?patient_id={{ patient.pk }}" class="btn btn-deep-teal btn-sm shadow-sm">
+                        <i class="bi bi-clipboard2-pulse me-1"></i>New Consultation
+                    </a>
+                    {% endif %}
+                    {% if is_nurse or is_doctor or is_admin %}
+                    <a href="{% url 'medical_records:record_vitals' patient.pk %}" class="btn btn-clinical-green btn-sm shadow-sm">
+                        <i class="bi bi-heart-pulse me-1"></i>Record Vitals
+                    </a>
+                    <a href="{% url 'medical_records:record_history' patient.pk %}" class="btn btn-outline-teal btn-sm">
+                        <i class="bi bi-clipboard-plus me-1"></i>Medical History
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'appointments:appointment_book' %}?patient_id={{ patient.pk }}" class="btn btn-outline-teal btn-sm">
+                        <i class="bi bi-calendar-plus me-1"></i>Book Visit
+                    </a>
+                    <a href="{% url 'documents:document_upload' patient.pk %}" class="btn btn-outline-teal btn-sm">
+                        <i class="bi bi-upload me-1"></i>Upload Doc
+                    </a>
+                    {% if not is_nurse %}
+                    <a href="{% url 'patients:patient_update' patient.pk %}" class="btn btn-outline-teal btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 9 Tabs Navigation -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-header bg-white p-0 border-bottom">
+            <ul class="nav nav-clinical-tabs border-0 px-3 pt-2 mb-0" id="patientTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                        <i class="bi bi-grid-1x2 me-1"></i>Overview
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="personal-tab" data-bs-toggle="tab" data-bs-target="#personal" type="button" role="tab">
+                        <i class="bi bi-person-vcard me-1"></i>Personal Info
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                        <i class="bi bi-journal-medical me-1"></i>Medical History ({{ medical_histories.count }})
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="vitals-tab" data-bs-toggle="tab" data-bs-target="#vitals" type="button" role="tab">
+                        <i class="bi bi-activity me-1"></i>Vital Signs ({{ vital_records.count }})
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="consultations-tab" data-bs-toggle="tab" data-bs-target="#consultations" type="button" role="tab">
+                        <i class="bi bi-clipboard2-pulse me-1"></i>Consultations ({{ consultations_list.count }})
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="diagnoses-tab" data-bs-toggle="tab" data-bs-target="#diagnoses" type="button" role="tab">
+                        <i class="bi bi-bookmark-heart me-1"></i>Diagnoses
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="prescriptions-tab" data-bs-toggle="tab" data-bs-target="#prescriptions" type="button" role="tab">
+                        <i class="bi bi-capsule me-1"></i>Prescriptions ({{ prescriptions_list.count }})
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="appointments-tab" data-bs-toggle="tab" data-bs-target="#appointments" type="button" role="tab">
+                        <i class="bi bi-calendar-event me-1"></i>Appointments ({{ appointments_list.count }})
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button" role="tab">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i>Documents ({{ documents_list.count }})
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content" id="patientTabsContent">
+                
+                <!-- TAB 1: OVERVIEW -->
+                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                    <div class="row g-4">
+                        <!-- Left Column: Critical Clinical Highlights -->
+                        <div class="col-lg-7">
+                            <!-- Latest Vital Signs Strip -->
+                            <div class="card border border-primary border-opacity-25 bg-primary bg-opacity-10 mb-4">
+                                <div class="card-body p-3">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <h6 class="fw-bold text-primary mb-0"><i class="bi bi-heart-pulse-fill me-1"></i>Latest Vital Signs Intake</h6>
+                                        {% if latest_vital %}
+                                        <small class="text-muted">{{ latest_vital.measurement_time|date:"d-M-Y H:i" }}</small>
+                                        {% endif %}
+                                    </div>
+                                    {% if latest_vital %}
+                                    <div class="row g-2 text-center mt-1">
+                                        <div class="col-4 col-sm-2">
+                                            <div class="bg-white p-2 rounded border">
+                                                <small class="text-muted d-block">BP</small>
+                                                <strong>{{ latest_vital.blood_pressure_display }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 col-sm-2">
+                                            <div class="bg-white p-2 rounded border">
+                                                <small class="text-muted d-block">Pulse</small>
+                                                <strong>{{ latest_vital.heart_rate|default:"—" }} bpm</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 col-sm-2">
+                                            <div class="bg-white p-2 rounded border">
+                                                <small class="text-muted d-block">Temp</small>
+                                                <strong>{{ latest_vital.temperature_f|default:"—" }} °F</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 col-sm-2">
+                                            <div class="bg-white p-2 rounded border">
+                                                <small class="text-muted d-block">SpO2</small>
+                                                <strong>{{ latest_vital.oxygen_saturation|default:"—" }}%</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 col-sm-2">
+                                            <div class="bg-white p-2 rounded border">
+                                                <small class="text-muted d-block">BMI</small>
+                                                <strong>{{ latest_vital.bmi|default:"—" }}</strong>
+                                            </div>
+                                        </div>
+                                        <div class="col-4 col-sm-2">
+                                            <div class="bg-white p-2 rounded border">
+                                                <small class="text-muted d-block">Pain</small>
+                                                <strong>{{ latest_vital.pain_score }}/10</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% else %}
+                                    <p class="text-muted small mb-0">No vital signs recorded yet for this patient.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Allergies Alert Box -->
+                            <div class="card border border-danger border-opacity-25 bg-danger bg-opacity-10 mb-4">
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold text-danger mb-1"><i class="bi bi-shield-slash me-1"></i>Allergies & Adverse Reactions</h6>
+                                    {% if latest_history and latest_history.known_allergies %}
+                                    <p class="mb-0 text-dark fw-medium">{{ latest_history.known_allergies }}</p>
+                                    <small class="text-muted">Type: {{ latest_history.allergy_type|default:"General" }} | Severity: {{ latest_history.get_allergy_severity_display }}</small>
+                                    {% else %}
+                                    <p class="mb-0 text-muted small">No known drug/food allergies reported (NKA).</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Chronic Conditions & Current Medications -->
+                            <div class="card border-0 shadow-sm mb-4">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="mb-0 fw-bold"><i class="bi bi-capsule-pill text-primary me-2"></i>Chronic Health Conditions & Routine Medications</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="mb-3">
+                                        <strong class="d-block text-secondary small">Documented Chronic Illnesses:</strong>
+                                        <p class="mb-0 text-dark">{{ latest_history.chronic_conditions|default:"None documented in medical history." }}</p>
+                                    </div>
+                                    <div>
+                                        <strong class="d-block text-secondary small">Current Prescribed / Routine Medications:</strong>
+                                        <p class="mb-0 text-dark">{{ latest_history.current_medications|default:"None reported." }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Consultation -->
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
+                                    <h6 class="mb-0 fw-bold"><i class="bi bi-clipboard2-pulse text-success me-2"></i>Most Recent Case-Taking Consultation</h6>
+                                    {% if recent_consultation %}
+                                    <a href="{% url 'consultations:consultation_detail' recent_consultation.pk %}" class="small text-primary text-decoration-none">Open Case Sheet &rarr;</a>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body p-3">
+                                    {% if recent_consultation %}
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong class="text-dark">{{ recent_consultation.consultation_id }}</strong>
+                                        <span class="badge {% if recent_consultation.is_finalized %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
+                                            {{ recent_consultation.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="small text-muted mb-1">Doctor: {{ recent_consultation.doctor.display_title }} | {{ recent_consultation.created_at|date:"d-M-Y H:i" }}</div>
+                                    <div class="small"><strong>Diagnosis:</strong> {{ recent_consultation.final_diagnosis|default:recent_consultation.provisional_diagnosis|default:"Under clinical evaluation" }}</div>
+                                    <div class="small mt-1"><strong>Chief Complaints:</strong> {{ recent_consultation.chief_complaints|truncatechars:100 }}</div>
+                                    {% else %}
+                                    <p class="text-muted small mb-0">No consultations have been recorded for this patient yet.</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Patient Activity Timeline -->
+                        <div class="col-lg-5">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-header bg-white py-3">
+                                    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Patient Activity Timeline</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="timeline">
+                                        {% for event in timeline_events %}
+                                        <div class="timeline-item">
+                                            <div class="timeline-badge {{ event.badge }}">
+                                                <i class="bi {{ event.icon }}"></i>
+                                            </div>
+                                            <div>
+                                                <div class="d-flex justify-content-between align-items-baseline">
+                                                    <strong class="small text-dark">{{ event.title }}</strong>
+                                                    <span class="text-muted" style="font-size: 0.72rem;">{{ event.date|date:"d-M H:i" }}</span>
+                                                </div>
+                                                <p class="text-muted small mb-0">{{ event.description }}</p>
+                                            </div>
+                                        </div>
+                                        {% empty %}
+                                        <div class="text-muted small text-center py-4">No events logged yet.</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: PERSONAL INFO -->
+                <div class="tab-pane fade" id="personal" role="tabpanel">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary mb-3">Demographic Details</h6>
+                            <table class="table table-bordered table-sm">
+                                <tr><th class="w-40 bg-light">Patient ID</th><td class="font-monospace fw-bold">{{ patient.patient_id }}</td></tr>
+                                <tr><th class="bg-light">Full Name</th><td>{{ patient.get_full_name }}</td></tr>
+                                <tr><th class="bg-light">Date of Birth</th><td>{{ patient.date_of_birth|default:"Not recorded" }}</td></tr>
+                                <tr><th class="bg-light">Calculated Age</th><td>{{ patient.age }} Years</td></tr>
+                                <tr><th class="bg-light">Gender</th><td>{{ patient.get_gender_display }}</td></tr>
+                                <tr><th class="bg-light">Blood Group</th><td><span class="badge bg-danger-subtle text-danger">{{ patient.get_blood_group_display }}</span></td></tr>
+                                <tr><th class="bg-light">Marital Status</th><td>{{ patient.get_marital_status_display }}</td></tr>
+                                <tr><th class="bg-light">Occupation</th><td>{{ patient.occupation|default:"Not specified" }}</td></tr>
+                            </table>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary mb-3">Contact & Emergency Contacts</h6>
+                            <table class="table table-bordered table-sm">
+                                <tr><th class="w-40 bg-light">Primary Phone</th><td>{{ patient.phone_number }}</td></tr>
+                                <tr><th class="bg-light">Email Address</th><td>{{ patient.email|default:"None" }}</td></tr>
+                                <tr><th class="bg-light">Residential Address</th><td>{{ patient.address }}</td></tr>
+                                <tr><th class="bg-light">City / State / PIN</th><td>{{ patient.city }}, {{ patient.state }} - {{ patient.pin_code }}</td></tr>
+                                <tr><th class="bg-light">Emergency Contact</th><td>{{ patient.emergency_contact_name|default:"Not provided" }}</td></tr>
+                                <tr><th class="bg-light">Emergency Phone</th><td>{{ patient.emergency_contact_number|default:"Not provided" }}</td></tr>
+                                <tr><th class="bg-light">Emergency Relationship</th><td>{{ patient.emergency_relationship|default:"Not provided" }}</td></tr>
+                                <tr><th class="bg-light">Registration Source</th><td>{{ patient.get_registration_source_display }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: MEDICAL HISTORY -->
+                <div class="tab-pane fade" id="history" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-primary mb-0">Recorded Structured Medical Histories</h6>
+                        {% if is_doctor or is_nurse or is_admin %}
+                        <a href="{% url 'medical_records:record_history' patient.pk %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Add New History
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    {% for h in medical_histories %}
+                    <div class="card border shadow-sm mb-4">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>History Recorded:</strong> {{ h.created_at|date:"d-M-Y H:i" }}
+                                <span class="badge bg-secondary ms-2">Recorded by: {{ h.recorded_by.display_title|default:"Clinical Staff" }}</span>
+                            </div>
+                            <span class="badge {% if h.severity == 'SEVERE' %}bg-danger{% elif h.severity == 'MODERATE' %}bg-warning text-dark{% else %}bg-info text-white{% endif %}">
+                                Severity: {{ h.get_severity_display }}
+                            </span>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <h6 class="text-primary small fw-bold">Section A: Chief Complaints</h6>
+                                    <p class="mb-1"><strong>Complaint:</strong> {{ h.chief_complaint }}</p>
+                                    <p class="mb-1 small text-muted"><strong>Duration / Onset:</strong> {{ h.duration }} ({{ h.onset|default:"Onset not specified" }})</p>
+                                    <p class="mb-1 small text-muted"><strong>Associated Symptoms:</strong> {{ h.associated_symptoms|default:"None" }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-primary small fw-bold">Section B: History of Present Illness (HPI)</h6>
+                                    <p class="mb-1">{{ h.hpi_description }}</p>
+                                    {% if h.aggravating_factors %}<p class="mb-1 small text-muted"><strong>Aggravating Factors:</strong> {{ h.aggravating_factors }}</p>{% endif %}
+                                    {% if h.relieving_factors %}<p class="mb-1 small text-muted"><strong>Relieving Factors:</strong> {{ h.relieving_factors }}</p>{% endif %}
+                                </div>
+                                <div class="col-md-6 border-top pt-2">
+                                    <h6 class="text-primary small fw-bold">Section C: Past Medical & Surgical History</h6>
+                                    <p class="mb-1 small"><strong>Previous Illnesses:</strong> {{ h.previous_illnesses|default:"None" }}</p>
+                                    <p class="mb-1 small"><strong>Chronic Conditions:</strong> {{ h.chronic_conditions|default:"None" }}</p>
+                                    <p class="mb-1 small"><strong>Past Surgeries:</strong> {{ h.past_surgeries|default:"None" }}</p>
+                                </div>
+                                <div class="col-md-6 border-top pt-2">
+                                    <h6 class="text-primary small fw-bold">Section D: Family & Personal Habits</h6>
+                                    <p class="mb-1 small"><strong>Family History:</strong> {{ h.family_medical_history|default:"Non-contributory" }}</p>
+                                    <p class="mb-1 small"><strong>Habits:</strong> Smoking: {{ h.get_smoking_history_display }}, Alcohol: {{ h.get_alcohol_history_display }}, Diet: {{ h.get_dietary_habits_display }}</p>
+                                </div>
+                                <div class="col-12 border-top pt-2">
+                                    <h6 class="text-primary small fw-bold">Section E: Allergies & Medication History</h6>
+                                    <p class="mb-1 small"><strong>Allergies:</strong> {{ h.known_allergies|default:"No known allergies" }}</p>
+                                    <p class="mb-1 small"><strong>Routine Medications:</strong> {{ h.current_medications|default:"None" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">No medical history entries recorded yet.</div>
+                    {% endfor %}
+                </div>
+
+                <!-- TAB 4: VITAL SIGNS -->
+                <div class="tab-pane fade" id="vitals" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-primary mb-0">Historical Vital Signs Intake Log</h6>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'medical_records:vitals_trends' patient.pk %}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-graph-up me-1"></i>View Trends Chart
+                            </a>
+                            {% if is_nurse or is_doctor or is_admin %}
+                            <a href="{% url 'medical_records:record_vitals' patient.pk %}" class="btn btn-sm btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Record New Vitals
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Blood Pressure</th>
+                                    <th>Pulse</th>
+                                    <th>Temp (°F)</th>
+                                    <th>SpO2</th>
+                                    <th>Height & Weight</th>
+                                    <th>BMI</th>
+                                    <th>Pain Scale</th>
+                                    <th>Staff</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for v in vital_records %}
+                                <tr>
+                                    <td class="text-muted small">{{ v.measurement_time|date:"d-M-Y H:i" }}</td>
+                                    <td><strong>{{ v.blood_pressure_display }}</strong></td>
+                                    <td>{{ v.heart_rate|default:"—" }} bpm</td>
+                                    <td>{{ v.temperature_f|default:"—" }} °F</td>
+                                    <td>{{ v.oxygen_saturation|default:"—" }}%</td>
+                                    <td>
+                                        <small>{{ v.height_cm|default:"—" }} cm / {{ v.weight_kg|default:"—" }} kg</small>
+                                    </td>
+                                    <td>
+                                        {% if v.bmi %}
+                                        <span class="badge 
+                                            {% if v.bmi < 18.5 %}bg-warning text-dark
+                                            {% elif v.bmi < 25.0 %}bg-success
+                                            {% elif v.bmi < 30.0 %}bg-warning text-dark
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ v.bmi }} ({{ v.bmi_category }})
+                                        </span>
+                                        {% else %}—{% endif %}
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">{{ v.pain_score }}/10</span></td>
+                                    <td class="text-muted small">{{ v.recorded_by.display_title|default:"Staff" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="9" class="text-center py-4 text-muted">No vitals recorded yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 5: CONSULTATIONS -->
+                <div class="tab-pane fade" id="consultations" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-primary mb-0">Clinical Case Consultations</h6>
+                        {% if is_doctor or is_admin %}
+                        <a href="{% url 'consultations:consultation_create' %}?patient_id={{ patient.pk }}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-file-earmark-medical me-1"></i>New Consultation
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Consultation ID</th>
+                                    <th>Date</th>
+                                    <th>Physician</th>
+                                    <th>Diagnosis</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in consultations_list %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'consultations:consultation_detail' c.pk %}" class="fw-bold text-dark font-monospace">
+                                            {{ c.consultation_id }}
+                                        </a>
+                                    </td>
+                                    <td class="text-muted small">{{ c.created_at|date:"d-M-Y H:i" }}</td>
+                                    <td>{{ c.doctor.display_title }}</td>
+                                    <td>
+                                        <strong>{{ c.provisional_diagnosis }}</strong>
+                                        {% if c.final_diagnosis %}<div class="text-muted small">{{ c.final_diagnosis }}</div>{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if c.is_finalized %}
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Finalized & Locked</span>
+                                        {% else %}
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle">Draft / In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'consultations:consultation_detail' c.pk %}" class="btn btn-outline-primary" title="View Details">
+                                                <i class="bi bi-eye"></i> View
+                                            </a>
+                                            <a href="{% url 'consultations:consultation_pdf' c.pk %}" class="btn btn-outline-danger" target="_blank" title="Download PDF">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                            </a>
+                                            <a href="{% url 'consultations:consultation_print' c.pk %}" class="btn btn-outline-secondary" target="_blank" title="Print Summary">
+                                                <i class="bi bi-printer"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" class="text-center py-4 text-muted">No clinical consultations documented yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 6: DIAGNOSES -->
+                <div class="tab-pane fade" id="diagnoses" role="tabpanel">
+                    <h6 class="fw-bold text-primary mb-3">Diagnostic History</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Consultation ID</th>
+                                    <th>Provisional Diagnosis</th>
+                                    <th>Confirmed Final Diagnosis</th>
+                                    <th>Diagnosing Physician</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in consultations_list %}
+                                {% if c.provisional_diagnosis or c.final_diagnosis %}
+                                <tr>
+                                    <td class="text-muted small">{{ c.created_at|date:"d-M-Y" }}</td>
+                                    <td><a href="{% url 'consultations:consultation_detail' c.pk %}" class="font-monospace fw-bold">{{ c.consultation_id }}</a></td>
+                                    <td>{{ c.provisional_diagnosis|default:"—" }}</td>
+                                    <td><strong class="text-success">{{ c.final_diagnosis|default:"Pending finalization" }}</strong></td>
+                                    <td>{{ c.doctor.display_title }}</td>
+                                </tr>
+                                {% endif %}
+                                {% empty %}
+                                <tr><td colspan="5" class="text-center py-4 text-muted">No diagnoses documented.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 7: PRESCRIPTIONS -->
+                <div class="tab-pane fade" id="prescriptions" role="tabpanel">
+                    <h6 class="fw-bold text-primary mb-3">Prescription History & Active Medications</h6>
+                    {% for rx in prescriptions_list %}
+                    <div class="card border mb-3">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="badge bg-primary me-2">Rx</span>
+                                <strong>Date:</strong> {{ rx.prescription_date|date:"d-M-Y" }} | <strong>Prescribed by:</strong> {{ rx.doctor.display_title }}
+                            </div>
+                            <a href="{% url 'consultations:consultation_detail' rx.consultation.pk %}" class="small text-primary text-decoration-none">Linked Case: {{ rx.consultation.consultation_id }}</a>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Medicine Name</th>
+                                        <th>Form</th>
+                                        <th>Dosage</th>
+                                        <th>Frequency</th>
+                                        <th>Timing</th>
+                                        <th>Duration</th>
+                                        <th>Instructions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in rx.items.all %}
+                                    <tr>
+                                        <td class="fw-bold">{{ item.medicine_name }}</td>
+                                        <td><span class="badge bg-light text-dark border">{{ item.get_dosage_form_display }}</span></td>
+                                        <td>{{ item.strength_dosage }}</td>
+                                        <td>{{ item.frequency }}</td>
+                                        <td>{{ item.get_timing_display }}</td>
+                                        <td>{{ item.duration }}</td>
+                                        <td class="text-muted small">{{ item.instructions|default:"—" }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="7" class="text-muted text-center py-2">No medications listed in this prescription.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if rx.general_advice %}
+                        <div class="card-footer bg-white small">
+                            <strong>Physician Advice:</strong> {{ rx.general_advice }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">No prescriptions authored yet for this patient.</div>
+                    {% endfor %}
+                </div>
+
+                <!-- TAB 8: APPOINTMENTS -->
+                <div class="tab-pane fade" id="appointments" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-primary mb-0">Scheduled & Past Appointments</h6>
+                        <a href="{% url 'appointments:appointment_book' %}?patient_id={{ patient.pk }}" class="btn btn-sm btn-success">
+                            <i class="bi bi-calendar-plus me-1"></i>Book New Appointment
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Appointment ID</th>
+                                    <th>Date & Time</th>
+                                    <th>Doctor</th>
+                                    <th>Reason / Complaint</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for apt in appointments_list %}
+                                <tr>
+                                    <td class="font-monospace fw-bold">{{ apt.appointment_id }}</td>
+                                    <td>{{ apt.appointment_date|date:"d-M-Y" }} at {{ apt.appointment_time|time:"H:i" }}</td>
+                                    <td>{{ apt.doctor.display_title }}</td>
+                                    <td>{{ apt.reason }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if apt.status == 'COMPLETED' %}bg-success-subtle text-success
+                                            {% elif apt.status == 'CONFIRMED' %}bg-primary-subtle text-primary
+                                            {% elif apt.status == 'CANCELLED' %}bg-danger-subtle text-danger
+                                            {% else %}bg-warning-subtle text-warning{% endif %}">
+                                            {{ apt.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        {% if apt.status != 'COMPLETED' and apt.status != 'CANCELLED' %}
+                                        <a href="{% url 'appointments:appointment_edit' apt.pk %}" class="btn btn-sm btn-outline-secondary me-1">Edit</a>
+                                        <a href="{% url 'appointments:appointment_cancel' apt.pk %}" class="btn btn-sm btn-outline-danger">Cancel</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" class="text-center py-4 text-muted">No appointments recorded for this patient.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 9: DOCUMENTS -->
+                <div class="tab-pane fade" id="documents" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-primary mb-0">Medical Records, Lab Reports & Documents</h6>
+                        <a href="{% url 'documents:document_upload' patient.pk %}" class="btn btn-sm btn-primary">
+                            <i class="bi bi-upload me-1"></i>Upload Document
+                        </a>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>File Size</th>
+                                    <th>Uploaded At</th>
+                                    <th>Uploaded By</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in documents_list %}
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold">{{ doc.title }}</div>
+                                        <small class="text-muted">{{ doc.description|truncatechars:60 }}</small>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark border">{{ doc.get_document_type_display }}</span></td>
+                                    <td>{{ doc.file_size_display }}</td>
+                                    <td class="text-muted small">{{ doc.uploaded_at|date:"d-M-Y H:i" }}</td>
+                                    <td class="small">{{ doc.uploaded_by.display_title|default:"Staff" }}</td>
+                                    <td class="text-end">
+                                        <a href="{% url 'documents:document_download' doc.pk %}" class="btn btn-sm btn-outline-primary me-1" target="_blank">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                        {% if is_admin or is_doctor or doc.uploaded_by == user %}
+                                        <a href="{% url 'documents:document_delete' doc.pk %}" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr><td colspan="6" class="text-center py-4 text-muted">No documents uploaded for this patient yet.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

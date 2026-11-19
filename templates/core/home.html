@@ -1,0 +1,58 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Patient Case-Taking Software | SIH 2026 (SIH26047) & INT253 Project{% endblock %}
+
+{% block content %}
+<!-- Academic System Overview & Launch Station (Clean, Uncluttered Viewport) -->
+<section class="hero-section py-5 py-lg-6 d-flex align-items-center" style="min-height: calc(100vh - 160px); background: radial-gradient(circle at 50% 25%, rgba(234, 242, 236, 0.75) 0%, transparent 70%), var(--color-warm-bg);">
+    <div class="container py-lg-4">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-10 col-xl-9">
+                
+                <div class="hero-badge mx-auto d-inline-flex mb-4">
+                    <i class="bi bi-mortarboard-fill text-clinical-green me-2"></i> Academic Project &bull; INT253 Web Development &bull; SIH 2026 PS ID: SIH26047
+                </div>
+
+                <h1 class="hero-title mb-4" style="font-size: clamp(2.4rem, 4.4vw, 3.8rem); line-height: 1.18; letter-spacing: -0.025em;">
+                    Empowering Clinical Care with Automated Case-Taking
+                </h1>
+
+                <p class="hero-subtitle mx-auto mb-5 text-secondary" style="max-width: 760px; font-size: 1.15rem; line-height: 1.8;">
+                    A specialized hospital information system engineered to eliminate clinical documentation bottlenecks. Captures structured 9-domain patient histories, systemic physical examinations, real-time longitudinal vital telemetry, and tamper-proof electronic prescriptions with strict role-based access control.
+                </p>
+
+                <!-- Academic Action Launchers -->
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-3 mb-5">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-deep-teal btn-lg px-4 py-3 rounded-pill shadow-sm">
+                        <i class="bi bi-shield-lock me-2"></i> Launch Staff Terminal
+                    </a>
+                    <a href="{% url 'core:how_it_works' %}" class="btn btn-outline-teal btn-lg px-4 py-3 rounded-pill">
+                        <i class="bi bi-diagram-3 me-2"></i> Case-Taking Workflow
+                    </a>
+                    <a href="{% url 'core:clinical_care' %}" class="btn btn-outline-teal btn-lg px-4 py-3 rounded-pill">
+                        <i class="bi bi-cpu me-2"></i> System Architecture
+                    </a>
+                </div>
+
+                <!-- Minimal, Quiet Trust Indicators -->
+                <div class="d-flex flex-wrap align-items-center justify-content-center gap-4 gap-md-5 pt-3 text-muted small">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check2-circle text-clinical-green fs-5"></i>
+                        <span class="fw-medium text-secondary">Zero Paper Clutter</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check2-circle text-clinical-green fs-5"></i>
+                        <span class="fw-medium text-secondary">Longitudinal Telemetry</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-check2-circle text-clinical-green fs-5"></i>
+                        <span class="fw-medium text-secondary">Tamper-Proof Audit</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

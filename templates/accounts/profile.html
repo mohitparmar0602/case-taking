@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile — {{ user.display_title }} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">User Account</span>
+            <h2 class="font-serif text-dark-teal mb-1">Staff Profile & Account Settings</h2>
+            <p class="text-secondary small mb-0">Manage your contact credentials and security authentication.</p>
+        </div>
+        <div>
+            <span class="badge-clinical 
+                {% if user.role == 'ADMIN' %}badge-role-admin
+                {% elif user.role == 'DOCTOR' %}badge-role-doctor
+                {% elif user.role == 'RECEPTIONIST' %}badge-role-receptionist
+                {% else %}badge-role-nurse{% endif %} fs-6 px-3 py-1.5">
+                <i class="bi bi-shield-lock me-1"></i>{{ user_role_label }}
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Profile Info Card -->
+        <div class="col-lg-4">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-body text-center p-4">
+                    <div class="user-avatar-pill mx-auto mb-3" style="width: 72px; height: 72px; font-size: 1.8rem;">
+                        {{ user.first_name|default:user.username|slice:":1"|upper }}
+                    </div>
+                    <h4 class="font-serif text-dark-teal mb-1">{{ user.display_title }}</h4>
+                    <p class="text-secondary small mb-3 font-monospace">@{{ user.username }}</p>
+
+                    <div class="border-top pt-3 text-start small">
+                        <div class="mb-2"><strong>Employee ID:</strong> <span class="text-secondary">{{ staff_profile.employee_id|default:"N/A" }}</span></div>
+                        <div class="mb-2"><strong>Department:</strong> <span class="text-secondary">{{ staff_profile.department|default:"General OPD" }}</span></div>
+                        <div class="mb-2"><strong>Specialization:</strong> <span class="text-secondary">{{ staff_profile.specialization|default:"General" }}</span></div>
+                        <div class="mb-2"><strong>Qualification:</strong> <span class="text-secondary">{{ staff_profile.qualification|default:"Medical Graduate" }}</span></div>
+                        {% if staff_profile.license_number %}
+                        <div class="mb-2"><strong>License No:</strong> <span class="text-secondary">{{ staff_profile.license_number }}</span></div>
+                        {% endif %}
+                        <div class="mb-2"><strong>Account Status:</strong> <span class="badge-clinical badge-status-completed">Active & Authorized</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile & Password Change Forms -->
+        <div class="col-lg-8">
+            <div class="card mb-4 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-person-gear text-clinical-green me-2"></i>Update Contact Information</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="update_profile" value="1">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">First Name</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Last Name</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Email Address</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold text-secondary">Phone Number</label>
+                                {{ form.phone }}
+                            </div>
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-deep-teal px-4 shadow-sm">
+                                <i class="bi bi-save me-1"></i>Save Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Password Change -->
+            <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-key text-clinical-green me-2"></i>Change Security Password</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="change_password" value="1">
+                        <div class="row g-3">
+                            {% for field in pwd_form %}
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-secondary">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="text-end mt-4">
+                            <button type="submit" class="btn btn-outline-danger px-4">
+                                <i class="bi bi-shield-lock me-1"></i>Update Password
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

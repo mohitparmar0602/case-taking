@@ -1,0 +1,44 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}500 - Internal Server Error | Carevia{% endblock %}
+
+{% block content %}
+<div class="py-5" style="background: radial-gradient(circle at 50% 25%, rgba(254, 242, 242, 0.7) 0%, transparent 60%), var(--color-warm-bg); min-height: calc(100vh - 220px); display: flex; align-items: center;">
+    <div class="container py-4 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <div class="card border-0 shadow-elevated p-4 p-md-5 bg-white rounded-4">
+                    <div class="brand-icon mx-auto mb-4" style="width: 68px; height: 68px; font-size: 2rem; background: #FEE2E2; color: #DC2626;">
+                        <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+
+                    <span class="badge-clinical badge-status-cancelled mb-3 mx-auto">Error Code: 500 &bull; Server Error</span>
+
+                    <h1 class="font-serif text-dark-teal h3 mb-2">Unexpected Server Incident</h1>
+                    
+                    <p class="text-secondary small mb-4" style="line-height: 1.65;">
+                        The system encountered an internal execution issue while processing your clinical request. The error has been flagged in the diagnostic logs for administrative remediation.
+                    </p>
+
+                    <div class="d-flex flex-wrap justify-content-center gap-3 pt-2">
+                        <a href="{% url 'core:home' %}" class="btn btn-deep-teal">
+                            <i class="bi bi-house-door me-1"></i> Return Home
+                        </a>
+                        <a href="javascript:location.reload();" class="btn btn-outline-teal">
+                            <i class="bi bi-arrow-clockwise me-1"></i> Retry Request
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-secondary small">
+                    <i class="bi bi-shield-check text-clinical-green me-1"></i>
+                    Carevia Clinical Healthcare Platform &bull; INT253 Academic Project Compliance
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

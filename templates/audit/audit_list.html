@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}System Audit Trail & Security Logs | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Compliance & Integrity</span>
+            <h2 class="font-serif text-dark-teal mb-1">System Audit Trail & Security Logs</h2>
+            <p class="text-secondary small mb-0">Immutable chronological record of logins, case finalizations, vital intakes, and administrative events.</p>
+        </div>
+        <div>
+            <span class="badge-clinical badge-status-cancelled">
+                <i class="bi bi-shield-lock-fill me-1"></i>Administrator Restricted Access
+            </span>
+        </div>
+    </div>
+
+    <!-- Filters & Search -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-3">
+            <form method="get" class="row g-2 align-items-center">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-secondary"><i class="bi bi-search"></i></span>
+                        <input type="text" name="q" class="form-control border-start-0" placeholder="Search by description, record ID, or IP..." value="{{ query }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="action" class="form-select">
+                        <option value="">All Action Types</option>
+                        {% for code, label in actions %}
+                        <option value="{{ code }}" {% if selected_action == code %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="user" class="form-select">
+                        <option value="">All Staff</option>
+                        {% for u in users %}
+                        <option value="{{ u.pk }}" {% if selected_user == u.pk|stringformat:"i" %}selected{% endif %}>{{ u.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="date" name="date" class="form-control" value="{{ selected_date }}">
+                </div>
+                <div class="col-md-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-deep-teal w-100"><i class="bi bi-filter"></i></button>
+                    {% if query or selected_action or selected_user or selected_date %}
+                    <a href="{% url 'audit:audit_list' %}" class="btn btn-outline-teal" title="Reset"><i class="bi bi-arrow-counterclockwise"></i></a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audit Logs Table -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th style="width: 170px;">Timestamp</th>
+                        <th>User / Actor</th>
+                        <th>Action Performed</th>
+                        <th>Record Ref</th>
+                        <th>IP Address</th>
+                        <th>Log Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in page_obj %}
+                    <tr>
+                        <td class="text-secondary small font-monospace">{{ log.timestamp|date:"d-M-Y H:i:s" }}</td>
+                        <td>
+                            {% if log.user %}
+                            <div class="fw-bold text-dark-teal">{{ log.user.display_title }}</div>
+                            <small class="text-secondary font-monospace">@{{ log.user.username }} ({{ log.user.get_role_display }})</small>
+                            {% else %}
+                            <span class="text-secondary fst-italic">Anonymous / System</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge-clinical 
+                                {% if 'FINALIZE' in log.action %}badge-status-completed
+                                {% elif 'LOGIN' in log.action or 'REGISTER' in log.action %}badge-status-confirmed
+                                {% elif 'DELETE' in log.action or 'ALERT' in log.action %}badge-status-cancelled
+                                {% elif 'UPDATE' in log.action %}badge-status-pending
+                                {% else %}badge-status-confirmed{% endif %}">
+                                {{ log.get_action_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if log.record_id %}
+                            <span class="font-monospace text-deep-teal small">{{ log.record_type }}: {{ log.record_id }}</span>
+                            {% else %}
+                            <span class="text-secondary">—</span>
+                            {% endif %}
+                        </td>
+                        <td><small class="font-monospace text-secondary">{{ log.ip_address|default:"127.0.0.1" }}</small></td>
+                        <td class="small text-secondary">{{ log.description }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-secondary">
+                            <i class="bi bi-journal-x fs-1 d-block mb-2 text-muted"></i>
+                            No audit trail events matched the filter.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <div class="card-footer bg-white py-3 border-top">
+            <nav>
+                <ul class="pagination pagination-sm justify-content-center mb-0">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo; Previous</a></li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

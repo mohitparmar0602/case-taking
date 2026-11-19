@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Edit Patient Demographics{% else %}Register Patient{% endif %} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">{% if is_edit %}Demographic Update{% else %}Patient Intake{% endif %}</span>
+            <h2 class="font-serif text-dark-teal mb-1">{% if is_edit %}Edit Patient Demographics{% else %}New Patient Intake & Registration{% endif %}</h2>
+            <p class="text-secondary small mb-0">Collect structured demographics, residential contact info, and emergency references.</p>
+        </div>
+        <div>
+            <a href="{% if is_edit %}{% url 'patients:patient_detail' patient.pk %}{% else %}{% url 'patients:patient_list' %}{% endif %}" class="btn btn-outline-teal btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Back
+            </a>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-body p-4 p-md-5">
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Section 1: Personal Details -->
+                <h5 class="fw-bold text-dark-teal mb-3"><i class="bi bi-person-vcard text-clinical-green me-2"></i>Personal & Demographic Identification</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">First Name *</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}<div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Last Name *</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}<div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                        <small class="text-secondary d-block mt-1" style="font-size: 0.74rem;">Age calculates automatically upon selection.</small>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">Age (Years) *</label>
+                        {{ form.age }}
+                        {% if form.age.errors %}<div class="text-danger small mt-1">{{ form.age.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Gender *</label>
+                        {{ form.gender }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Blood Group *</label>
+                        {{ form.blood_group }}
+                    </div>
+                </div>
+
+                <!-- Section 2: Contact & Address -->
+                <h5 class="fw-bold text-dark-teal mb-3 border-top pt-4"><i class="bi bi-geo-alt text-clinical-green me-2"></i>Contact Information & Address</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Mobile Phone Number *</label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}<div class="text-danger small mt-1">{{ form.phone_number.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Email Address</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold text-secondary">Residential Address / Street *</label>
+                        {{ form.address }}
+                        {% if form.address.errors %}<div class="text-danger small mt-1">{{ form.address.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">City *</label>
+                        {{ form.city }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">State *</label>
+                        {{ form.state }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Postal PIN Code *</label>
+                        {{ form.pin_code }}
+                    </div>
+                </div>
+
+                <!-- Section 3: Emergency Contact Details -->
+                <h5 class="fw-bold text-dark-teal mb-3 border-top pt-4"><i class="bi bi-telephone-plus text-clinical-green me-2"></i>Emergency Contact Details</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Emergency Contact Name</label>
+                        {{ form.emergency_contact_name }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Emergency Phone Number</label>
+                        {{ form.emergency_contact_number }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Relationship with Patient</label>
+                        {{ form.emergency_relationship }}
+                    </div>
+                </div>
+
+                <!-- Section 4: Demographic / Socio-economic -->
+                <h5 class="fw-bold text-dark-teal mb-3 border-top pt-4"><i class="bi bi-info-circle text-clinical-green me-2"></i>Additional Context</h5>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Marital Status</label>
+                        {{ form.marital_status }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Occupation</label>
+                        {{ form.occupation }}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-secondary">Registration Channel</label>
+                        {{ form.registration_source }}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger mb-4">
+                    {% for err in form.non_field_errors %}
+                    <div><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ err }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="d-flex justify-content-end gap-2 border-top pt-4">
+                    <a href="{% url 'patients:patient_list' %}" class="btn btn-outline-teal px-4">Cancel</a>
+                    <button type="submit" class="btn btn-deep-teal px-4 fw-semibold shadow-sm">
+                        <i class="bi bi-check-circle me-1"></i>{% if is_edit %}Save Changes{% else %}Register Patient & Issue PID{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

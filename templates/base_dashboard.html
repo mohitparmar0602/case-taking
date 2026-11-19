@@ -1,0 +1,73 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ institution.name|default:"Carevia Medical Centre" }}{% endblock %} | SIH 2026</title>
+    
+    <!-- Google Fonts: DM Serif Display & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Scandinavian Clinical CSS Architecture -->
+    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div id="wrapper">
+        {% if user.is_authenticated %}
+            <!-- Scandinavian Dark Teal Sidebar Navigation -->
+            {% include "includes/sidebar.html" %}
+        {% endif %}
+
+        <!-- Content Area -->
+        <div id="main-content">
+            {% if user.is_authenticated %}
+                {% include "includes/navbar.html" %}
+            {% endif %}
+
+            <!-- Alert Messages -->
+            <div class="px-3 px-md-4 pt-3">
+                {% include "includes/messages.html" %}
+            </div>
+
+            <!-- Main Page Content Slot -->
+            <main class="flex-grow-1 p-3 p-md-4">
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- Dashboard Footer -->
+            <footer class="bg-white border-top py-3 px-4 text-secondary small no-print">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+                    <span class="d-inline-flex align-items-center gap-2">
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">SIH26047</span>
+                        <span>{{ institution.name|default:"Carevia Medical Centre" }} &copy; 2026. Clinical Case Platform.</span>
+                    </span>
+                    <span class="text-secondary">
+                        <i class="bi bi-shield-lock-fill text-clinical-green me-1"></i>Role-Based Clinical Access Enforced
+                    </span>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Custom Main Script -->
+    <script src="{% static 'js/main.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

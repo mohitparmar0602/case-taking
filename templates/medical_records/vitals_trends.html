@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Vitals Trends & Telemetry | {{ patient.get_full_name }} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Longitudinal Telemetry</span>
+            <h2 class="font-serif text-dark-teal mb-1">Vital Signs Longitudinal Trends & Analytics</h2>
+            <p class="text-secondary small mb-0">Patient: <strong class="text-dark-teal">{{ patient.get_full_name }}</strong> (PID: <span class="font-monospace text-deep-teal">{{ patient.patient_id }}</span>)</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'medical_records:record_vitals' patient.pk %}" class="btn btn-deep-teal btn-sm shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i>New Measurement
+            </a>
+            <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-teal btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Patient Dossier
+            </a>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row g-4 mb-4">
+        <!-- Blood Pressure Chart -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-heart-pulse text-danger me-2"></i>Blood Pressure Trajectory (mmHg)</h6>
+                    <span class="badge-clinical badge-status-confirmed">Longitudinal</span>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="bpChart" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Heart Rate & Oxygen Saturation -->
+        <div class="col-lg-6">
+            <div class="card h-100 border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-activity text-clinical-green me-2"></i>Heart Rate (bpm) & SpO2 (%) Trends</h6>
+                    <span class="badge-clinical badge-status-confirmed">Telemetry</span>
+                </div>
+                <div class="card-body p-4">
+                    <canvas id="pulseChart" style="max-height: 280px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Table -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-header bg-white py-3 border-bottom">
+            <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-table text-clinical-green me-2"></i>Detailed Measurement Chronology</h6>
+        </div>
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>BP (mmHg)</th>
+                        <th>Heart Rate</th>
+                        <th>Temp (°F)</th>
+                        <th>Resp Rate</th>
+                        <th>SpO2</th>
+                        <th>BMI</th>
+                        <th>Pain (0-10)</th>
+                        <th>Staff Member</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in vitals_qs %}
+                    <tr>
+                        <td class="text-secondary small">{{ v.measurement_time|date:"d-M-Y H:i" }}</td>
+                        <td class="fw-bold text-dark-teal">{{ v.blood_pressure_display }}</td>
+                        <td>{{ v.heart_rate|default:"—" }} bpm</td>
+                        <td>{{ v.temperature_f|default:"—" }} °F</td>
+                        <td>{{ v.respiratory_rate|default:"—" }} /min</td>
+                        <td>{{ v.oxygen_saturation|default:"—" }}%</td>
+                        <td>{{ v.bmi|default:"—" }}</td>
+                        <td><span class="badge-clinical badge-status-confirmed">{{ v.pain_score }}/10</span></td>
+                        <td class="small text-secondary">{{ v.recorded_by.display_title|default:"Staff" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="9" class="text-center py-5 text-secondary">No measurements recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const dates = {{ chart_dates|safe }};
+    const systolic = {{ chart_systolic|safe }};
+    const diastolic = {{ chart_diastolic|safe }};
+    const hr = {{ chart_hr|safe }};
+    const spo2 = {{ chart_spo2|safe }};
+
+    // BP Chart
+    const bpCanvas = document.getElementById('bpChart');
+    if (bpCanvas && dates.length > 0) {
+        new Chart(bpCanvas, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Systolic BP (mmHg)',
+                        data: systolic,
+                        borderColor: '#C75B5B',
+                        backgroundColor: 'rgba(199, 91, 91, 0.08)',
+                        tension: 0.35,
+                        fill: false,
+                    },
+                    {
+                        label: 'Diastolic BP (mmHg)',
+                        data: diastolic,
+                        borderColor: '#123F3D',
+                        backgroundColor: 'rgba(18, 63, 61, 0.08)',
+                        tension: 0.35,
+                        fill: false,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { min: 40, max: 200, grid: { color: 'rgba(0,0,0,0.04)' } }
+                }
+            }
+        });
+    }
+
+    // Pulse & SpO2 Chart
+    const pulseCanvas = document.getElementById('pulseChart');
+    if (pulseCanvas && dates.length > 0) {
+        new Chart(pulseCanvas, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [
+                    {
+                        label: 'Heart Rate (bpm)',
+                        data: hr,
+                        borderColor: '#6D9780',
+                        tension: 0.35,
+                        fill: false,
+                    },
+                    {
+                        label: 'SpO2 (%)',
+                        data: spo2,
+                        borderColor: '#3D788C',
+                        tension: 0.35,
+                        fill: false,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { min: 50, max: 150, grid: { color: 'rgba(0,0,0,0.04)' } }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,438 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Edit Draft — {{ consultation.consultation_id }}{% else %}Digital Case-Taking & Consultation{% endif %} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Clinical Intake Session</span>
+            <h2 class="font-serif text-dark-teal mb-1">{% if is_edit %}Edit Clinical Case: {{ consultation.consultation_id }}{% else %}Digital Case-Taking Consultation{% endif %}</h2>
+            <p class="text-secondary small mb-0">Physician: <strong class="text-dark-teal">{{ user.display_title }}</strong> ({{ user.profile.specialization|default:"Consultant Physician" }}) &bull; Structured diagnostic encounter</p>
+        </div>
+        <div>
+            <a href="{% if patient %}{% url 'patients:patient_detail' patient.pk %}{% else %}{% url 'consultations:consultation_list' %}{% endif %}" class="btn btn-outline-teal btn-sm">
+                <i class="bi bi-arrow-left me-1"></i>Cancel
+            </a>
+        </div>
+    </div>
+
+    <!-- Patient Context Banner -->
+    {% if patient %}
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg); background-color: var(--color-light-mint); border: 1px solid var(--color-soft-sage) !important;">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="user-avatar-pill" style="width: 44px; height: 44px; font-size: 1.1rem;">
+                        {{ patient.first_name|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <strong class="text-dark-teal fs-6">{{ patient.get_full_name }}</strong>
+                            <span class="badge-clinical badge-status-confirmed font-monospace">{{ patient.patient_id }}</span>
+                            <span class="badge-clinical badge-status-cancelled">{{ patient.get_blood_group_display }}</span>
+                        </div>
+                        <div class="text-secondary small">
+                            {{ patient.age }} Years &bull; {{ patient.get_gender_display }} &bull; Phone: {{ patient.phone_number }}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-sm btn-white bg-white border shadow-sm text-dark-teal" target="_blank">
+                        <i class="bi bi-box-arrow-up-right me-1"></i>Open Medical Dossier
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Main Clinical Form (Left 8 Cols) -->
+        <div class="col-lg-8">
+            <form method="post" id="consultationForm" novalidate>
+                {% csrf_token %}
+
+                <!-- Tabs Navigation -->
+                <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+                    <div class="card-header bg-white p-0 border-bottom">
+                        <ul class="nav nav-clinical-tabs border-0 px-3 pt-2 mb-0" id="caseTabs" role="tablist">
+                            <li class="nav-item">
+                                <button class="nav-link active" id="symptoms-tab" data-bs-toggle="tab" data-bs-target="#symptoms" type="button" role="tab">
+                                    <i class="bi bi-chat-left-text me-1"></i>History & Presentation
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="exam-tab" data-bs-toggle="tab" data-bs-target="#exam" type="button" role="tab">
+                                    <i class="bi bi-person-check me-1"></i>Clinical Exam
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="diagnosis-tab" data-bs-toggle="tab" data-bs-target="#diagnosis" type="button" role="tab">
+                                    <i class="bi bi-bookmark-heart me-1"></i>Diagnosis & Care Plan
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="rx-tab" data-bs-toggle="tab" data-bs-target="#rx" type="button" role="tab">
+                                    <i class="bi bi-capsule me-1"></i>Prescription (Rx)
+                                </button>
+                            </li>
+                            <li class="nav-item">
+                                <button class="nav-link" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">
+                                    <i class="bi bi-lock me-1"></i>Private Notes
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="caseTabsContent">
+
+                            <!-- TAB 1: HISTORY & PRESENTATION -->
+                            <div class="tab-pane fade show active" id="symptoms" role="tabpanel">
+                                <div class="row g-3">
+                                    {% if not patient %}
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-secondary">Select Patient *</label>
+                                        {{ form.patient }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-secondary">Linked Appointment (Optional)</label>
+                                        {{ form.appointment }}
+                                    </div>
+                                    {% else %}
+                                    <input type="hidden" name="patient" value="{{ patient.pk }}">
+                                    {% if appointment %}<input type="hidden" name="appointment" value="{{ appointment.pk }}">{% endif %}
+                                    {% endif %}
+
+                                    <div class="col-12">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                                            <label class="form-label small fw-semibold text-secondary mb-0">Chief Presenting Complaints *</label>
+                                            <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-lightning-charge text-clinical-green me-1"></i>Quick Presets (1-Click Fill):</span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1 mb-2">
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-chip" style="font-size: 0.74rem; background: #fff;" data-text="Acute high-grade fever with chills and body ache for 3 days.">
+                                                + Acute Fever (3d)
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-chip" style="font-size: 0.74rem; background: #fff;" data-text="Routine hypertension follow-up. Reports mild frontal headache, no chest pain.">
+                                                + Hypertension Follow-up
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-chip" style="font-size: 0.74rem; background: #fff;" data-text="Persistent dry cough, throat irritation, and mild dyspnea for 5 days.">
+                                                + Dry Cough &amp; Dyspnea (5d)
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-chip" style="font-size: 0.74rem; background: #fff;" data-text="Type-2 Diabetes Mellitus review. Experiencing fatigue, polyuria, and increased thirst.">
+                                                + T2D Review
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-chip" style="font-size: 0.74rem; background: #fff;" data-text="Epigastric burning discomfort, postprandial fullness, and acid reflux for 1 week.">
+                                                + Acid Reflux / GERD
+                                            </button>
+                                        </div>
+                                        {{ form.chief_complaints }}
+                                        {% if form.chief_complaints.errors %}<div class="text-danger small mt-1">{{ form.chief_complaints.errors.0 }}</div>{% endif %}
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">History of Present Illness (HPI Narrative)</label>
+                                        {{ form.history_of_present_illness }}
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">Relevant Medical / Surgical / Allergy History Summary</label>
+                                        {{ form.past_history_summary }}
+                                        <small class="text-muted" style="font-size: 0.74rem;">Pre-filled with documented allergies and chronic conditions.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 2: CLINICAL EXAMINATION -->
+                            <div class="tab-pane fade" id="exam" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">General Physical Examination Findings</label>
+                                        {{ form.general_examination }}
+                                        <small class="text-muted" style="font-size: 0.74rem;">Appearance, Pallor, Icterus, Cyanosis, Clubbing, Lymphadenopathy, Edema (P/I/C/C/L/E)</small>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">Systemic Examination (CVS, RS, CNS, GI / Abdomen)</label>
+                                        {{ form.systemic_examination }}
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">Local / Anatomical Examination</label>
+                                        {{ form.local_examination }}
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">Physician Clinical Observations & Risk Assessment</label>
+                                        {{ form.clinical_observations }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 3: DIAGNOSIS & CARE PLAN -->
+                            <div class="tab-pane fade" id="diagnosis" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                                            <label class="form-label small fw-semibold text-secondary mb-0">Provisional Clinical Diagnosis</label>
+                                            <span class="text-secondary" style="font-size: 0.72rem;"><i class="bi bi-lightning-charge text-clinical-green me-1"></i>Presets:</span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1 mb-2">
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-diagnosis-chip" style="font-size: 0.74rem; background: #fff;" data-text="Acute Viral Upper Respiratory Infection (URI)">
+                                                + Viral URI
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-diagnosis-chip" style="font-size: 0.74rem; background: #fff;" data-text="Essential Hypertension (Stage 1)">
+                                                + Hypertension (Stage 1)
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-diagnosis-chip" style="font-size: 0.74rem; background: #fff;" data-text="Type-2 Diabetes Mellitus (Uncomplicated)">
+                                                + T2D Mellitus
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-light border py-0 px-2 rounded-pill quick-diagnosis-chip" style="font-size: 0.74rem; background: #fff;" data-text="Gastroesophageal Reflux Disease (GERD)">
+                                                + GERD / Dyspepsia
+                                            </button>
+                                        </div>
+                                        {{ form.provisional_diagnosis }}
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-semibold text-secondary">Confirmed Final Diagnosis (ICD-10 / Clinical)</label>
+                                        {{ form.final_diagnosis }}
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">Comprehensive Treatment Plan & Management Strategy</label>
+                                        {{ form.treatment_plan }}
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label class="form-label small fw-semibold text-secondary">Recommended Diagnostic Investigations (Labs, Radiology, ECG)</label>
+                                        {{ form.recommended_investigations }}
+                                    </div>
+
+                                    <div class="col-md-8">
+                                        <label class="form-label small fw-semibold text-secondary">Dietary & Lifestyle Advice</label>
+                                        {{ form.dietary_lifestyle_advice }}
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <label class="form-label small fw-semibold text-secondary">Next Follow-up Date</label>
+                                        {{ form.follow_up_date }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 4: PRESCRIPTION (Rx) -->
+                            <div class="tab-pane fade" id="rx" role="tabpanel">
+                                <div class="rx-header">
+                                    <div>
+                                        <h5 class="fw-bold text-dark-teal mb-0">Medical Prescription (Rx)</h5>
+                                        <small class="text-secondary">Standardized Pharmacotherapy Dosage Schedule</small>
+                                    </div>
+                                    <div class="rx-symbol">&reals;x</div>
+                                </div>
+
+                                <!-- Rx Items Formset -->
+                                {{ rx_itemset.management_form }}
+                                <div id="rx-items-container">
+                                    {% for item_form in rx_itemset %}
+                                    <div class="rx-item-row p-3 mb-3 border rounded-3 bg-light bg-opacity-50">
+                                        {{ item_form.id }}
+                                        <div class="row g-2">
+                                            <div class="col-md-4">
+                                                <label class="form-label small fw-semibold text-secondary">Medicine Generic / Brand Name</label>
+                                                {{ item_form.medicine_name }}
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small fw-semibold text-secondary">Dosage Form</label>
+                                                {{ item_form.dosage_form }}
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small fw-semibold text-secondary">Strength</label>
+                                                {{ item_form.strength_dosage }}
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small fw-semibold text-secondary">Frequency</label>
+                                                {{ item_form.frequency }}
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label small fw-semibold text-secondary">Timing</label>
+                                                {{ item_form.timing }}
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label small fw-semibold text-secondary">Duration</label>
+                                                {{ item_form.duration }}
+                                            </div>
+                                            <div class="col-md-7">
+                                                <label class="form-label small fw-semibold text-secondary">Specific Instructions</label>
+                                                {{ item_form.instructions }}
+                                            </div>
+                                            {% if rx_itemset.can_delete %}
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <div class="form-check mb-2">
+                                                    {{ item_form.DELETE }}
+                                                    <label class="form-check-label small text-danger" for="{{ item_form.DELETE.id_for_label }}">Delete</label>
+                                                </div>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary">General Prescription & Dietary Advice</label>
+                                    {{ rx_form.general_advice }}
+                                </div>
+                            </div>
+
+                            <!-- TAB 5: PRIVATE DOCTOR NOTES -->
+                            <div class="tab-pane fade" id="notes" role="tabpanel">
+                                <div class="p-3 rounded-3 small mb-3" style="background-color: var(--color-light-mint); border: 1px solid var(--color-soft-sage);">
+                                    <i class="bi bi-shield-lock text-clinical-green me-1"></i>These notes are private to consulting physicians and are excluded from patient-facing printed summaries.
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-semibold text-secondary">Physician Confidential Case Notes</label>
+                                    {{ form.doctor_private_notes }}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Bottom Action Controls -->
+                    <div class="card-footer bg-white p-3 d-flex flex-wrap align-items-center justify-content-between gap-2 border-top">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">
+                                <i class="bi bi-shield-check"></i> SIH Audit Trail Active
+                            </span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" name="save_draft" class="btn btn-outline-teal px-4 fw-semibold shadow-sm">
+                                <i class="bi bi-save me-1"></i>Save as Draft Case
+                            </button>
+                            <button type="submit" name="finalize_now" value="1" class="btn btn-clinical-green px-4 fw-semibold shadow-sm" onclick="return confirm('Finalize and sign this clinical case? Once finalized, modifications are locked and can only be amended via auditable addenda.');">
+                                <i class="bi bi-check2-all me-1"></i>Finalize & Sign Case
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Clinical Reference Sidebar (Right 4 Cols) -->
+        <div class="col-lg-4">
+            <!-- Latest Vitals Quick Reference -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-heart-pulse text-clinical-green me-2"></i>Patient Intake Vitals</h6>
+                    {% if patient %}
+                    <a href="{% url 'medical_records:vitals_trends' patient.pk %}" class="small text-deep-teal fw-semibold text-decoration-none" target="_blank">Trends &rarr;</a>
+                    {% endif %}
+                </div>
+                <div class="card-body p-3">
+                    {% if patient_vitals %}
+                        {% with v=patient_vitals.0 %}
+                        <div class="row g-2 text-center small mb-2">
+                            <div class="col-6"><div class="vital-stat-box p-2"><div class="vital-label">BP</div><strong class="text-dark-teal">{{ v.blood_pressure_display }}</strong></div></div>
+                            <div class="col-6"><div class="vital-stat-box p-2"><div class="vital-label">Pulse</div><strong class="text-dark-teal">{{ v.heart_rate|default:"—" }} bpm</strong></div></div>
+                            <div class="col-6"><div class="vital-stat-box p-2"><div class="vital-label">Temp</div><strong class="text-dark-teal">{{ v.temperature_f|default:"—" }} °F</strong></div></div>
+                            <div class="col-6"><div class="vital-stat-box p-2"><div class="vital-label">SpO2</div><strong class="text-dark-teal">{{ v.oxygen_saturation|default:"—" }}%</strong></div></div>
+                            <div class="col-6"><div class="vital-stat-box p-2"><div class="vital-label">BMI</div><strong class="text-dark-teal">{{ v.bmi|default:"—" }}</strong></div></div>
+                            <div class="col-6"><div class="vital-stat-box p-2"><div class="vital-label">Pain</div><strong class="text-dark-teal">{{ v.pain_score }}/10</strong></div></div>
+                        </div>
+                        <div class="small text-secondary text-end" style="font-size: 0.72rem;">Measured: {{ v.measurement_time|date:"d-M H:i" }}</div>
+                        {% endwith %}
+                    {% else %}
+                        <p class="text-secondary small text-center mb-0 py-2">No vitals recorded for this patient yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Allergy Alert -->
+            <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg); background-color: var(--color-danger-bg); border: 1px solid rgba(199, 91, 91, 0.25) !important;">
+                <div class="card-body p-3">
+                    <h6 class="fw-bold text-danger mb-1"><i class="bi bi-shield-slash me-1"></i>Reported Allergies</h6>
+                    {% if patient_histories.0.known_allergies %}
+                    <p class="small text-dark fw-bold mb-0">{{ patient_histories.0.known_allergies }}</p>
+                    {% else %}
+                    <p class="small text-secondary mb-0">No drug allergies reported (NKA).</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Previous Consultations -->
+            <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+                <div class="card-header bg-white py-3 border-bottom">
+                    <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-journal-medical text-clinical-green me-2"></i>Prior Encounters</h6>
+                </div>
+                <div class="card-body p-3">
+                    {% for pc in patient_prev_consultations %}
+                    <div class="p-2.5 mb-2 rounded-3 border bg-light bg-opacity-50">
+                        <div class="d-flex justify-content-between small text-secondary mb-1">
+                            <span class="font-monospace fw-semibold">{{ pc.consultation_id }}</span>
+                            <span>{{ pc.created_at|date:"d-M-Y" }}</span>
+                        </div>
+                        <strong class="d-block small text-dark-teal">{{ pc.final_diagnosis|default:pc.provisional_diagnosis }}</strong>
+                        <small class="text-secondary">Doctor: {{ pc.doctor.display_title }}</small>
+                    </div>
+                    {% empty %}
+                    <p class="text-secondary small text-center mb-0 py-2">No prior consultations recorded.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Chief Complaints Quick Presets
+    const complaintsInput = document.getElementById('{{ form.chief_complaints.id_for_label }}') || document.querySelector('[name="chief_complaints"]');
+    document.querySelectorAll('.quick-chip').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const text = this.getAttribute('data-text');
+            if (complaintsInput) {
+                if (complaintsInput.value.trim() === '') {
+                    complaintsInput.value = text;
+                } else {
+                    complaintsInput.value = complaintsInput.value.trim() + '\n' + text;
+                }
+                complaintsInput.focus();
+                
+                // Visual feedback pulse
+                this.classList.remove('btn-light');
+                this.classList.add('btn-clinical-green', 'text-white');
+                setTimeout(() => {
+                    this.classList.remove('btn-clinical-green', 'text-white');
+                    this.classList.add('btn-light');
+                }, 400);
+            }
+        });
+    });
+
+    // 2. Provisional Diagnosis Quick Presets
+    const diagnosisInput = document.getElementById('{{ form.provisional_diagnosis.id_for_label }}') || document.querySelector('[name="provisional_diagnosis"]');
+    document.querySelectorAll('.quick-diagnosis-chip').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            const text = this.getAttribute('data-text');
+            if (diagnosisInput) {
+                diagnosisInput.value = text;
+                diagnosisInput.focus();
+
+                // Visual feedback pulse
+                this.classList.remove('btn-light');
+                this.classList.add('btn-clinical-green', 'text-white');
+                setTimeout(() => {
+                    this.classList.remove('btn-clinical-green', 'text-white');
+                    this.classList.add('btn-light');
+                }, 400);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

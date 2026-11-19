@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Carevia Healthcare | Scandinavian Clinical Precision{% endblock %} | SIH 2026</title>
+    
+    <!-- Google Fonts: DM Serif Display & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap 5.3.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Scandinavian Design System & Public CSS -->
+    <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+    <link rel="stylesheet" href="{% static 'css/public.css' %}">
+    <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- Public Navigation Bar -->
+    <nav class="navbar navbar-expand-lg public-navbar sticky-top">
+        <div class="container">
+            <a class="public-brand" href="{% url 'core:home' %}">
+                <span class="brand-mark"><i class="bi bi-heart-pulse-fill"></i></span>
+                <span class="d-flex flex-column lh-1">
+                    <span style="font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em;">Carevia Case-Taking</span>
+                    <small class="text-secondary fw-normal font-sans" style="font-size: 0.65rem; letter-spacing: 0.05em;">SIH26047 &bull; INT253 PROJECT</small>
+                </span>
+            </a>
+
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#publicNav" aria-controls="publicNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list fs-2 text-dark-teal"></i>
+            </button>
+
+            <div class="collapse navbar-collapse" id="publicNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-2 gap-lg-4">
+                    <li class="nav-item">
+                        <a class="public-nav-link {% if request.resolver_match.url_name == 'how_it_works' %}active{% endif %}" href="{% url 'core:how_it_works' %}">Case-Taking Workflow</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="public-nav-link {% if request.resolver_match.url_name == 'clinical_care' %}active{% endif %}" href="{% url 'core:clinical_care' %}">System Architecture</a>
+                    </li>
+                </ul>
+
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-deep-teal btn-sm px-3 py-2 rounded-pill shadow-none">
+                        <i class="bi bi-shield-lock me-1"></i> Staff Terminal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Global Alert Messages -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% include "includes/messages.html" %}
+    </div>
+    {% endif %}
+
+    <!-- Main Content Slot -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Public Booking Modal -->
+    <div class="modal fade" id="publicBookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-dropdown" style="border-radius: var(--radius-xl);">
+                <div class="modal-header border-bottom border-light px-4 pt-4 pb-2">
+                    <div>
+                        <span class="badge-clinical badge-status-confirmed mb-1">Online Case Intake</span>
+                        <h4 class="modal-title font-serif text-dark-teal" id="bookingModalLabel">Schedule a Consultation</h4>
+                        <p class="text-muted small mb-0">Experience comprehensive, unhurried healthcare with our clinical specialists.</p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form method="POST" action="{% url 'core:home' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="public_booking_submit" value="1">
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold text-secondary">First Name *</label>
+                                <input type="text" name="first_name" class="form-control" required placeholder="e.g. Ramesh">
+                            </div>
+                            <div class="col-sm-6">
+                                <label class="form-label small fw-semibold text-secondary">Last Name *</label>
+                                <input type="text" name="last_name" class="form-control" required placeholder="e.g. Gupta">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Mobile Phone Number *</label>
+                            <input type="tel" name="phone" class="form-control" required placeholder="e.g. +91 98765 43210">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Select Specialist *</label>
+                            <select name="doctor_id" class="form-select" required>
+                                <option value="" selected disabled>Choose a Doctor</option>
+                                {% for doc in doctors %}
+                                <option value="{{ doc.id }}">{{ doc.display_title }} ({{ doc.profile.specialization|default:"General Medicine" }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Preferred Date *</label>
+                            <input type="date" name="preferred_date" class="form-control" required id="bookingDateInput">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold text-secondary">Primary Symptoms / Reason</label>
+                            <textarea name="reason" class="form-control" rows="2" placeholder="Briefly describe your symptoms or reason for visit..."></textarea>
+                        </div>
+
+                        <div class="d-grid pt-2">
+                            <button type="submit" class="btn btn-deep-teal btn-lg">
+                                <i class="bi bi-check2-circle me-1"></i> Request Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light border-0 py-2 px-4 text-center rounded-bottom" style="border-radius: 0 0 var(--radius-xl) var(--radius-xl);">
+                    <small class="text-muted w-100"><i class="bi bi-shield-check text-success me-1"></i>Zero paper dependency. Strict patient privacy guaranteed.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minimal Clean Footer -->
+    <footer class="py-4 border-top text-center" style="background-color: var(--color-warm-bg); border-color: #EDF1ED !important;">
+        <div class="container">
+            <p class="text-secondary small mb-0">&copy; 2026 Patient Case-Taking Software &bull; SIH 2026 (SIH26047) &bull; INT253 Academic Project</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script>
+        // Set minimum booking date to today
+        const dateInput = document.getElementById('bookingDateInput');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            dateInput.value = today;
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

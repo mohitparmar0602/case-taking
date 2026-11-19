@@ -1,0 +1,31 @@
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Django
+*.log
+local_settings.py
+db.sqlite3-journal
+
+# Static & Media uploads (preserve placeholder files)
+staticfiles/
+media/patient_documents/*
+!media/patient_documents/.gitkeep
+
+# IDE & OS Files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Test & Coverage
+.coverage
+htmlcov/

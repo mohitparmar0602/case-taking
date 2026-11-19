@@ -1,0 +1,103 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Staff Sign In | Carevia Clinical Case-Taking{% endblock %}
+
+{% block content %}
+<div class="py-5" style="background: radial-gradient(circle at 50% 20%, rgba(234, 242, 236, 0.7) 0%, transparent 60%), var(--color-warm-bg); min-height: calc(100vh - 200px);">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-6 col-xl-5">
+                
+                <!-- Terminal Card -->
+                <div class="card border-0 shadow-elevated" style="border-radius: var(--radius-xl); overflow: hidden;">
+                    <div class="p-4 p-md-5 text-center bg-white border-bottom border-light">
+                        <div class="brand-icon mx-auto mb-3" style="width: 52px; height: 52px; font-size: 1.5rem;">
+                            <i class="bi bi-shield-lock-fill"></i>
+                        </div>
+                        <h2 class="font-serif text-dark-teal mb-1">Staff Terminal Login</h2>
+                        <p class="text-secondary small mb-0">Authorized clinical personnel access only &bull; SIH 2026</p>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5 bg-white">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label small fw-semibold text-secondary">Username or Staff ID</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}
+                                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ form.username.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="{{ form.password.id_for_label }}" class="form-label small fw-semibold text-secondary mb-1">Password</label>
+                                <div class="input-group">
+                                    {{ form.password }}
+                                    <button class="btn btn-outline-secondary border-start-0" type="button" id="togglePasswordBtn" style="border-color: #dee2e6; background: #fff;" title="Show or hide password" aria-label="Toggle password visibility">
+                                        <i class="bi bi-eye text-secondary" id="togglePasswordIcon"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                <div class="text-danger small mt-1"><i class="bi bi-exclamation-circle me-1"></i>{{ form.password.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid mb-3">
+                                <button type="submit" class="btn btn-deep-teal btn-lg">
+                                    <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Clinical Workspace
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security & Audit Compliance Notice -->
+                    <div class="p-4 bg-light border-top border-light-subtle">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="text-clinical-green fs-4 lh-1 mt-1">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <h6 class="small fw-bold text-dark-teal mb-1">Authorized Access Only</h6>
+                                <p class="text-secondary small mb-0" style="font-size: 0.78rem; line-height: 1.45;">
+                                    This terminal is restricted to credentialed clinical staff. All login actions, session activity, and record access are immutably logged in the institutional audit registry (SIH 2026 Security Protocol).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a href="{% url 'core:home' %}" class="text-secondary small text-decoration-none">
+                        <i class="bi bi-arrow-left me-1"></i>Return to Carevia Public Website
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('togglePasswordBtn');
+    const passField = document.getElementById('{{ form.password.id_for_label }}');
+    const toggleIcon = document.getElementById('togglePasswordIcon');
+
+    if (toggleBtn && passField && toggleIcon) {
+        toggleBtn.addEventListener('click', function() {
+            if (passField.type === 'password') {
+                passField.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passField.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

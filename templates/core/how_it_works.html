@@ -1,0 +1,102 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}Case-Taking Workflow | The Four Pillars of Clinical Case-Taking | SIH 2026{% endblock %}
+
+{% block content %}
+<!-- Page Hero Banner -->
+<section class="py-5" style="background: radial-gradient(circle at 50% 20%, rgba(234, 242, 236, 0.7) 0%, transparent 60%), var(--color-warm-bg);">
+    <div class="container py-4 text-center">
+        <div class="hero-badge mx-auto d-inline-flex mb-3">
+            <i class="bi bi-diagram-3-fill text-clinical-green me-1"></i> Patient Experience & Workflow
+        </div>
+        <h1 class="hero-title mb-3">
+            The Four Pillars of Modern Case-Taking
+        </h1>
+        <p class="hero-subtitle mx-auto mb-0" style="max-width: 720px;">
+            A seamless care continuum ensuring zero data loss from the moment a patient steps into the clinic to post-consultation recovery.
+        </p>
+    </div>
+</section>
+
+<!-- The Four Pillars Cards (Directly matching clinical design) -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container py-3">
+        <div class="row g-4 justify-content-center">
+            <!-- Pillar 1 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="process-step-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="step-badge mb-3 d-inline-flex align-items-center justify-content-center bg-dark-teal text-white rounded-circle fw-bold" style="width: 40px; height: 40px; font-size: 1rem; background-color: var(--color-dark-teal, #123F3D);">1</div>
+                    <h3 class="h5 fw-bold text-dark-teal mb-2 font-serif">Digital Reception Intake</h3>
+                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                        Rapid patient check-in, automated Unique PID assignment, emergency contact registration, and consent recording in under 2 minutes.
+                    </p>
+                    <div class="pt-2 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Receptionist Role</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillar 2 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="process-step-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="step-badge mb-3 d-inline-flex align-items-center justify-content-center bg-dark-teal text-white rounded-circle fw-bold" style="width: 40px; height: 40px; font-size: 1rem; background-color: var(--color-dark-teal, #123F3D);">2</div>
+                    <h3 class="h5 fw-bold text-dark-teal mb-2 font-serif">Vitals & History Capture</h3>
+                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                        Nurses record baseline physiological parameters (BP, Pulse, SpO2, Temp, BMI) and update family, surgical, and allergen histories.
+                    </p>
+                    <div class="pt-2 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Nurse Role</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillar 3 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="process-step-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="step-badge mb-3 d-inline-flex align-items-center justify-content-center bg-dark-teal text-white rounded-circle fw-bold" style="width: 40px; height: 40px; font-size: 1rem; background-color: var(--color-dark-teal, #123F3D);">3</div>
+                    <h3 class="h5 fw-bold text-dark-teal mb-2 font-serif">Physician Case-Taking</h3>
+                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                        Doctors document chief complaints, physical findings, provisional diagnoses, and review longitudinal vital trend graphs simultaneously.
+                    </p>
+                    <div class="pt-2 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Doctor Role</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pillar 4 -->
+            <div class="col-md-6 col-lg-3">
+                <div class="process-step-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="step-badge mb-3 d-inline-flex align-items-center justify-content-center bg-dark-teal text-white rounded-circle fw-bold" style="width: 40px; height: 40px; font-size: 1rem; background-color: var(--color-dark-teal, #123F3D);">4</div>
+                    <h3 class="h5 fw-bold text-dark-teal mb-2 font-serif">Digital Rx & Continuity</h3>
+                    <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.6;">
+                        Legible e-prescriptions, structured dosage tables, downloadable PDF clinical summaries, and scheduled follow-up appointments.
+                    </p>
+                    <div class="pt-2 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Complete Discharge</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Academic Access Action Banner -->
+<section class="py-5 bg-white border-top text-center" style="border-color: #EDF1ED !important;">
+    <div class="container py-3">
+        <h2 class="section-title mb-2">Evaluate the Case-Taking Workflow Live</h2>
+        <p class="section-lead mx-auto mb-4 text-secondary" style="max-width: 600px;">
+            Log in to the clinical terminals to experience the four phases of modern case-taking from intake to digital discharge.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'accounts:login' %}" class="btn btn-deep-teal btn-lg px-4 py-3 rounded-pill shadow-sm">
+                <i class="bi bi-shield-lock me-2"></i> Launch Staff Terminal
+            </a>
+            <a href="{% url 'core:clinical_care' %}" class="btn btn-outline-teal btn-lg px-4 py-3 rounded-pill">
+                <i class="bi bi-cpu me-2"></i> View System Architecture
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}404 - Clinical Record Not Found | Carevia{% endblock %}
+
+{% block content %}
+<div class="py-5" style="background: radial-gradient(circle at 50% 25%, rgba(234, 242, 236, 0.7) 0%, transparent 60%), var(--color-warm-bg); min-height: calc(100vh - 220px); display: flex; align-items: center;">
+    <div class="container py-4 text-center">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <div class="card border-0 shadow-elevated p-4 p-md-5 bg-white rounded-4">
+                    <div class="brand-icon mx-auto mb-4" style="width: 68px; height: 68px; font-size: 2rem; background: var(--color-soft-mint); color: var(--color-dark-teal);">
+                        <i class="bi bi-file-earmark-medical"></i>
+                    </div>
+
+                    <span class="badge-clinical badge-status-cancelled mb-3 mx-auto">Error Code: 404 &bull; Page Not Found</span>
+
+                    <h1 class="font-serif text-dark-teal h3 mb-2">Record or Endpoint Not Found</h1>
+                    
+                    <p class="text-secondary small mb-4" style="line-height: 1.65;">
+                        The clinical dossier, page, or API endpoint you requested does not exist or may have been relocated. All clinical data remains securely safeguarded.
+                    </p>
+
+                    <div class="d-flex flex-wrap justify-content-center gap-3 pt-2">
+                        <a href="{% url 'core:home' %}" class="btn btn-deep-teal">
+                            <i class="bi bi-house-door me-1"></i> Return Home
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-teal">
+                            <i class="bi bi-shield-lock me-1"></i> Staff Portal
+                        </a>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-secondary small">
+                    <i class="bi bi-shield-check text-clinical-green me-1"></i>
+                    Carevia Clinical Healthcare Platform &bull; INT253 Academic Project Compliance
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

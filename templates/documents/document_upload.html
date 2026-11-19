@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Medical Document | {{ patient.get_full_name }} | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h5 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-file-earmark-arrow-up text-clinical-green me-2"></i>Upload Patient Medical Document</h5>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <div class="p-3 mb-4 rounded-3 border" style="background-color: var(--color-light-mint); border-color: var(--color-soft-sage) !important;">
+                    <strong class="text-dark-teal">Patient:</strong> {{ patient.get_full_name }} (<span class="font-monospace text-deep-teal">{{ patient.patient_id }}</span>)
+                </div>
+
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Document Title / Diagnostic Test Name *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Document Category *</label>
+                        {{ form.document_type }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold text-secondary">Choose File *</label>
+                        {{ form.file }}
+                        <small class="text-secondary d-block mt-1" style="font-size: 0.74rem;">Allowed formats: PDF, JPG, PNG, DOCX. Max file size: 10 MB.</small>
+                        {% if form.file.errors %}<div class="text-danger small mt-1">{{ form.file.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-semibold text-secondary">Description / Clinical Findings</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 border-top pt-3">
+                        <a href="{% url 'patients:patient_detail' patient.pk %}" class="btn btn-outline-teal px-4">Cancel</a>
+                        <button type="submit" class="btn btn-deep-teal px-4 fw-semibold shadow-sm">
+                            <i class="bi bi-upload me-1"></i>Upload & Save Document
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Nursing Intake & Vitals Station | {{ institution.name|default:"Carevia" }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+        <div>
+            <span class="badge-clinical badge-status-confirmed mb-1">Nursing Station</span>
+            <h2 class="font-serif text-dark-teal mb-1">Triage & Vital Signs Telemetry</h2>
+            <p class="text-secondary small mb-0">Welcome, {{ user.display_title }}. Measure vital signs, calculate BMI, document allergies, and prepare patient records for physician consultation.</p>
+        </div>
+        <div>
+            <a href="{% url 'patients:patient_list' %}" class="btn btn-deep-teal btn-sm shadow-sm">
+                <i class="bi bi-heart-pulse-fill me-1"></i>Select Patient for Intake
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-6">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Vital Signs Logged Today</div>
+                        <div class="stat-value">{{ vitals_count_today }}</div>
+                        <span class="badge-clinical badge-status-confirmed" style="font-size: 0.72rem;">Clinical entries captured</span>
+                    </div>
+                    <div class="stat-card-icon icon-green">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-6">
+            <div class="stat-card-clinical">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="stat-title">Patients in Intake Queue</div>
+                        <div class="stat-value">{{ active_queue_count }}</div>
+                        <span class="badge-clinical badge-status-pending" style="font-size: 0.72rem;">Awaiting triage vitals</span>
+                    </div>
+                    <div class="stat-card-icon icon-teal">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients Awaiting Intake / Intake Queue -->
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--radius-lg);">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 border-bottom">
+            <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-thermometer-half text-danger me-2"></i>Today's Patients for Vitals Intake</h6>
+            <span class="badge-clinical badge-status-confirmed">{{ appointments_today.count }} Scheduled</span>
+        </div>
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Patient ID</th>
+                        <th>Patient Name</th>
+                        <th>Age / Gender</th>
+                        <th>Assigned Doctor</th>
+                        <th class="text-end">Nursing Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apt in appointments_today %}
+                    <tr>
+                        <td>
+                            <span class="badge-clinical badge-status-confirmed">
+                                {{ apt.appointment_time|time:"H:i" }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' apt.patient.pk %}" class="fw-bold text-deep-teal text-decoration-none">
+                                {{ apt.patient.patient_id }}
+                            </a>
+                        </td>
+                        <td class="fw-medium text-dark-teal">{{ apt.patient.get_full_name }}</td>
+                        <td>{{ apt.patient.age }}y / {{ apt.patient.get_gender_display }}</td>
+                        <td class="text-secondary small">{{ apt.doctor.display_title }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'medical_records:record_vitals' apt.patient.pk %}" class="btn btn-sm btn-clinical-green me-1">
+                                <i class="bi bi-heart-pulse me-1"></i>Record Vitals
+                            </a>
+                            <a href="{% url 'medical_records:record_history' apt.patient.pk %}" class="btn btn-sm btn-outline-teal">
+                                <i class="bi bi-clipboard-plus me-1"></i>History
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center py-4 text-secondary">No scheduled patients in today's intake queue.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Recently Entered Vitals -->
+    <div class="card border-0 shadow-sm" style="border-radius: var(--radius-lg);">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-3 border-bottom">
+            <h6 class="mb-0 fw-bold text-dark-teal"><i class="bi bi-check-all text-clinical-green me-2"></i>Recently Logged Vital Signs</h6>
+        </div>
+        <div class="clinical-table-wrap border-0">
+            <table class="clinical-table">
+                <thead>
+                    <tr>
+                        <th>Recorded At</th>
+                        <th>Patient</th>
+                        <th>Blood Pressure</th>
+                        <th>Heart Rate</th>
+                        <th>Temp</th>
+                        <th>SpO2</th>
+                        <th>BMI Category</th>
+                        <th>Pain Scale</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for v in recent_vitals %}
+                    <tr>
+                        <td class="text-secondary small">{{ v.measurement_time|date:"d-M H:i" }}</td>
+                        <td>
+                            <a href="{% url 'patients:patient_detail' v.patient.pk %}" class="fw-bold text-deep-teal text-decoration-none">
+                                {{ v.patient.get_full_name }} <span class="text-secondary small font-monospace">({{ v.patient.patient_id }})</span>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge-clinical badge-status-confirmed">
+                                {{ v.blood_pressure_display }}
+                            </span>
+                        </td>
+                        <td>{{ v.heart_rate|default:"—" }} bpm</td>
+                        <td>{{ v.temperature_f|default:"—" }} °F</td>
+                        <td>{{ v.oxygen_saturation|default:"—" }}%</td>
+                        <td>
+                            {% if v.bmi %}
+                            <span class="badge-clinical 
+                                {% if v.bmi < 18.5 %}badge-status-pending
+                                {% elif v.bmi < 25.0 %}badge-status-completed
+                                {% elif v.bmi < 30.0 %}badge-status-pending
+                                {% else %}badge-status-cancelled{% endif %}">
+                                {{ v.bmi }} ({{ v.bmi_category }})
+                            </span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>
+                            <span class="badge-clinical badge-status-confirmed">{{ v.pain_score }}/10</span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center py-4 text-secondary">No vitals recorded today yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

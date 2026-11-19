@@ -1,0 +1,142 @@
+{% extends "base_public.html" %}
+{% load static %}
+
+{% block title %}System Architecture & Software Modules | SIH 2026 & INT253{% endblock %}
+
+{% block content %}
+<!-- Page Hero Banner -->
+<section class="py-5" style="background: radial-gradient(circle at 50% 20%, rgba(234, 242, 236, 0.7) 0%, transparent 60%), var(--color-warm-bg);">
+    <div class="container py-4 text-center">
+        <div class="hero-badge mx-auto d-inline-flex mb-3">
+            <i class="bi bi-cpu-fill text-clinical-green me-1"></i> Technical Architecture &bull; 10 Modular Django Applications
+        </div>
+        <h1 class="hero-title mb-3" style="font-size: clamp(2.1rem, 3.8vw, 3.2rem);">
+            System Architecture &amp; Clinical Engines
+        </h1>
+        <p class="hero-subtitle mx-auto mb-0 text-secondary" style="max-width: 760px; font-size: 1.1rem; line-height: 1.7;">
+            Complete technical breakdown of the 10 Django applications powering the Patient Case-Taking Software. Demonstrates Model-Template-View (MVT) design patterns, relational ORM data structures, and RESTful telemetry feeds.
+        </p>
+    </div>
+</section>
+
+<!-- The 6 Core Clinical Engines -->
+<section class="py-5 bg-white border-bottom">
+    <div class="container py-3">
+        <div class="row g-4">
+            <!-- Module 1 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="service-icon-box mb-3 d-inline-flex align-items-center justify-content-center bg-soft-mint text-dark-teal rounded-3 p-3" style="width: 52px; height: 52px;">
+                        <i class="bi bi-clipboard2-pulse fs-4 text-clinical-green"></i>
+                    </div>
+                    <h3 class="service-card-title font-serif text-dark-teal h5 mb-2">Structured Case-Taking</h3>
+                    <p class="service-card-desc text-secondary small flex-grow-1" style="line-height: 1.6;">
+                        Standardized capture of chief complaints, onset duration, severity scores, systematic clinical history, and physical examination findings without typing bottlenecks.
+                    </p>
+                    <div class="mt-auto pt-3 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed">Physician Led</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="service-icon-box mb-3 d-inline-flex align-items-center justify-content-center bg-soft-mint text-dark-teal rounded-3 p-3" style="width: 52px; height: 52px;">
+                        <i class="bi bi-activity fs-4 text-clinical-green"></i>
+                    </div>
+                    <h3 class="service-card-title font-serif text-dark-teal h5 mb-2">Vital Signs & Longitudinal Trends</h3>
+                    <p class="service-card-desc text-secondary small flex-grow-1" style="line-height: 1.6;">
+                        Record blood pressure, heart rate, SpO2, respiratory rate, and automated BMI calculations with interactive visual telemetry charts to spot clinical anomalies fast.
+                    </p>
+                    <div class="mt-auto pt-3 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed">Nurse &amp; Doctor Sync</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 3 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="service-icon-box mb-3 d-inline-flex align-items-center justify-content-center bg-soft-mint text-dark-teal rounded-3 p-3" style="width: 52px; height: 52px;">
+                        <i class="bi bi-prescription2 fs-4 text-clinical-green"></i>
+                    </div>
+                    <h3 class="service-card-title font-serif text-dark-teal h5 mb-2">Digital Rx &amp; Prescription Pad</h3>
+                    <p class="service-card-desc text-secondary small flex-grow-1" style="line-height: 1.6;">
+                        Generate standardized electronic prescriptions with dosage, frequency, course duration, and food instructions. Export ready-to-print or PDF clinical discharge records.
+                    </p>
+                    <div class="mt-auto pt-3 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed">Zero Illegibility</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 4 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="service-icon-box mb-3 d-inline-flex align-items-center justify-content-center bg-soft-mint text-dark-teal rounded-3 p-3" style="width: 52px; height: 52px;">
+                        <i class="bi bi-person-lines-fill fs-4 text-clinical-green"></i>
+                    </div>
+                    <h3 class="service-card-title font-serif text-dark-teal h5 mb-2">Patient Master Directory</h3>
+                    <p class="service-card-desc text-secondary small flex-grow-1" style="line-height: 1.6;">
+                        Unique Master Patient ID (PID) system with complete demographic capture, emergency contacts, allergy warnings, and longitudinal 9-tab medical dossiers.
+                    </p>
+                    <div class="mt-auto pt-3 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed">Deterministic PID</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 5 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="service-icon-box mb-3 d-inline-flex align-items-center justify-content-center bg-soft-mint text-dark-teal rounded-3 p-3" style="width: 52px; height: 52px;">
+                        <i class="bi bi-calendar2-range fs-4 text-clinical-green"></i>
+                    </div>
+                    <h3 class="service-card-title font-serif text-dark-teal h5 mb-2">Appointment Orchestration</h3>
+                    <p class="service-card-desc text-secondary small flex-grow-1" style="line-height: 1.6;">
+                        Multi-doctor daily agenda scheduling with collision-prevention logic, status tracking (Confirmed, Pending, Completed, Cancelled), and queue management.
+                    </p>
+                    <div class="mt-auto pt-3 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed">Queue Management</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 6 -->
+            <div class="col-md-6 col-lg-4">
+                <div class="service-card h-100 p-4 border rounded-4 bg-white shadow-sm d-flex flex-column" style="border-color: #E2E8F0 !important;">
+                    <div class="service-icon-box mb-3 d-inline-flex align-items-center justify-content-center bg-soft-mint text-dark-teal rounded-3 p-3" style="width: 52px; height: 52px;">
+                        <i class="bi bi-shield-lock fs-4 text-clinical-green"></i>
+                    </div>
+                    <h3 class="service-card-title font-serif text-dark-teal h5 mb-2">Security &amp; Audit Compliance</h3>
+                    <p class="service-card-desc text-secondary small flex-grow-1" style="line-height: 1.6;">
+                        Granular role-based access control (Admin, Doctor, Receptionist, Nurse) backed by immutable audit trail logging every view, create, edit, and export action.
+                    </p>
+                    <div class="mt-auto pt-3 border-top border-light-subtle">
+                        <span class="badge-clinical badge-status-confirmed">Immutable Audit</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Banner -->
+<section class="py-5 text-center bg-white border-top" style="border-color: #EDF1ED !important;">
+    <div class="container py-3">
+        <h2 class="section-title mb-2">Explore the Operating Workspaces</h2>
+        <p class="section-lead mx-auto mb-4 text-secondary" style="max-width: 600px;">
+            Log in to the operational clinical terminals to inspect the real-time interaction between these 10 applications.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+            <a href="{% url 'accounts:login' %}" class="btn btn-deep-teal btn-lg px-4 py-3 rounded-pill shadow-sm">
+                <i class="bi bi-shield-lock me-2"></i> Launch Staff Terminal
+            </a>
+            <a href="{% url 'core:how_it_works' %}" class="btn btn-outline-teal btn-lg px-4 py-3 rounded-pill">
+                <i class="bi bi-diagram-3 me-2"></i> View Case-Taking Workflow
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
