@@ -15,12 +15,13 @@ from appointments.models import Appointment
 from prescriptions.models import Prescription
 from prescriptions.forms import PrescriptionForm, PrescriptionItemFormSet
 from accounts.models import User
-from accounts.permissions import doctor_required
+from accounts.permissions import doctor_required, clinical_staff_required
 from audit.services import log_audit_event
 from audit.models import AuditLog
 
 
 @login_required
+@clinical_staff_required
 def consultation_list_view(request):
     query = request.GET.get('q', '').strip()
     status_filter = request.GET.get('status', '')
@@ -181,6 +182,7 @@ def consultation_create_view(request):
 
 
 @login_required
+@clinical_staff_required
 def consultation_detail_view(request, pk):
     consultation = get_object_or_404(
         Consultation.objects.select_related('patient', 'doctor', 'appointment', 'finalized_by'),
@@ -327,6 +329,7 @@ def consultation_amend_view(request, pk):
 
 
 @login_required
+@clinical_staff_required
 def consultation_pdf_view(request, pk):
     consultation = get_object_or_404(Consultation, pk=pk)
     pdf_buffer = generate_consultation_pdf(consultation)
@@ -347,6 +350,7 @@ def consultation_pdf_view(request, pk):
 
 
 @login_required
+@clinical_staff_required
 def consultation_print_view(request, pk):
     consultation = get_object_or_404(Consultation, pk=pk)
     prescription = getattr(consultation, 'prescription', None)
@@ -359,6 +363,7 @@ def consultation_print_view(request, pk):
 
 
 @login_required
+@clinical_staff_required
 def consultation_detail_by_code_view(request, code):
     """Retrieve consultation using unique code (re_path regex router)."""
     consultation = get_object_or_404(Consultation, consultation_id=code)

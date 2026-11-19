@@ -208,7 +208,7 @@
                             <div class="card border-0 shadow-sm">
                                 <div class="card-header bg-white d-flex align-items-center justify-content-between py-3">
                                     <h6 class="mb-0 fw-bold"><i class="bi bi-clipboard2-pulse text-success me-2"></i>Most Recent Case-Taking Consultation</h6>
-                                    {% if recent_consultation %}
+                                    {% if recent_consultation and not is_receptionist %}
                                     <a href="{% url 'consultations:consultation_detail' recent_consultation.pk %}" class="small text-primary text-decoration-none">Open Case Sheet &rarr;</a>
                                     {% endif %}
                                 </div>
@@ -445,9 +445,13 @@
                                 {% for c in consultations_list %}
                                 <tr>
                                     <td>
+                                        {% if not is_receptionist %}
                                         <a href="{% url 'consultations:consultation_detail' c.pk %}" class="fw-bold text-dark font-monospace">
                                             {{ c.consultation_id }}
                                         </a>
+                                        {% else %}
+                                        <span class="fw-bold text-dark font-monospace">{{ c.consultation_id }}</span>
+                                        {% endif %}
                                     </td>
                                     <td class="text-muted small">{{ c.created_at|date:"d-M-Y H:i" }}</td>
                                     <td>{{ c.doctor.display_title }}</td>
@@ -464,6 +468,7 @@
                                     </td>
                                     <td class="text-end">
                                         <div class="btn-group btn-group-sm">
+                                            {% if not is_receptionist %}
                                             <a href="{% url 'consultations:consultation_detail' c.pk %}" class="btn btn-outline-primary" title="View Details">
                                                 <i class="bi bi-eye"></i> View
                                             </a>
@@ -473,6 +478,9 @@
                                             <a href="{% url 'consultations:consultation_print' c.pk %}" class="btn btn-outline-secondary" target="_blank" title="Print Summary">
                                                 <i class="bi bi-printer"></i>
                                             </a>
+                                            {% else %}
+                                            <span class="text-muted small px-2">Clinical Only</span>
+                                            {% endif %}
                                         </div>
                                     </td>
                                 </tr>
@@ -527,7 +535,11 @@
                                 <span class="badge bg-primary me-2">Rx</span>
                                 <strong>Date:</strong> {{ rx.prescription_date|date:"d-M-Y" }} | <strong>Prescribed by:</strong> {{ rx.doctor.display_title }}
                             </div>
+                            {% if not is_receptionist %}
                             <a href="{% url 'consultations:consultation_detail' rx.consultation.pk %}" class="small text-primary text-decoration-none">Linked Case: {{ rx.consultation.consultation_id }}</a>
+                            {% else %}
+                            <span class="small text-muted">Linked Case: {{ rx.consultation.consultation_id }}</span>
+                            {% endif %}
                         </div>
                         <div class="table-responsive">
                             <table class="table table-sm align-middle mb-0">
